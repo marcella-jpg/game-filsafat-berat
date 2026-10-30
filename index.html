@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dilema Moral: Tentukan Hidupmu</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-color: #0d121d;
+  --card-bg: #151d2a;
+  --text-main: #e2e8f0;
+  --text-muted: #8094ae;
+  --border-color: #233246;
+  --accent-blue: #38bdf8;
+  --accent-purple: #c084fc;
+  --accent-red: #f87171;
+  --accent-amber: #fbbf24;
+  --accent-green: #34d399;
+  --ep-color: var(--accent-blue);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+  padding: 16px;
+  min-height: 100vh;
+}
+
+#app {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+}
+
+h1, h2, h3 {
+  font-family: 'Lora', serif;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.6rem; color: var(--ep-color); }
+h3 { font-size: 1.25rem; }
+
+p { margin-bottom: 12px; font-size: 0.98rem; }
+
+.art-container {
+  width: 100%;
+  height: 220px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px dashed var(--border-color);
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder-art {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 10px;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  background: rgba(0,0,0,0.5);
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.hud-item { display: flex; flex-direction: column; }
+.hud-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.hud-val { font-size: 1.1rem; font-weight: 700; color: var(--ep-color); }
+.hud-val.neg { color: var(--accent-red); }
+
+.sound-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ep-color);
+  color: var(--ep-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.log-box {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 120px;
+  max-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.log-entry {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.log-entry b { color: var(--accent-amber); }
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--border-color);
+  border-color: var(--ep-color);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button.primary {
+  border-color: var(--ep-color);
+  color: var(--ep-color);
+}
+
+button.choice-btn {
+  border-color: var(--border-color);
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+button.choice-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--text-muted);
+}
+
+button.action-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color);
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 0.85rem;
+}
+
+.ledger-table th, .ledger-table td {
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.ledger-table th {
+  background: rgba(0,0,0,0.5);
+  color: var(--ep-color);
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+/* ==========================================================================
+   TEMPAT INPUT ILUSTRASI (ASSETS)
+   ========================================================================== */
+const ASSETS = {
+  title_cover: "",      
+  // Episode 1 (Laila)
+  ep1_banner: "", scene_ep1_1: "", scene_ep1_2: "", scene_ep1_3: "", scene_ep1_4: "", scene_ep1_5: "",
+  ending_ep1_high: "", ending_ep1_mid: "", ending_ep1_low: "",
+  // Episode 2 (Marcella)
+  ep2_banner: "", scene_ep2_1: "", scene_ep2_2: "", scene_ep2_3: "", scene_ep2_4: "", scene_ep2_5: "",
+  ending_ep2_deon: "", ending_ep2_mercy: "", ending_ep2_corrupt: ""
+};
+
+/* ==========================================================================
+   TEMPAT INPUT AUDIO MP3
+   ========================================================================== */
+const ASSETS_AUDIO = {
+  bgm_main: ""
+};
+
+/* ==========================================================================
+   AUDIO ENGINE (SYNTHESIZER)
+   ========================================================================== */
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.isPlaying = false;
+    this.audioElement = null;
+    this.bgmTimer = null;
+    this.step = 0;
+    this.mode = 1;
+  }
+
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  toggleBGM() {
+    this.init();
+    if (this.isPlaying) {
+      this.stopBGM();
+    } else {
+      this.startBGM(this.mode);
+    }
+    return this.isPlaying;
+  }
+
+  startBGM(epNum = 1) {
+    this.init();
+    this.stopBGM();
+    this.mode = epNum;
+    this.isPlaying = true;
+
+    if (ASSETS_AUDIO.bgm_main !== "") {
+      if (!this.audioElement) {
+        this.audioElement = new Audio(ASSETS_AUDIO.bgm_main);
+        this.audioElement.loop = true;
+      }
+      this.audioElement.play();
+      return;
+    }
+
+    const chordsEp1 = [
+      [261.63, 329.63, 392.00], // C
+      [220.00, 261.63, 329.63], // Am
+      [174.61, 220.00, 261.63], // F
+      [196.00, 246.94, 293.66]  // G
+    ];
+
+    const chordsEp2 = [
+      [220.00, 261.63, 329.63], // Am
+      [174.61, 220.00, 261.63], // F
+      [130.81, 164.81, 196.00], // C
+      [164.81, 196.00, 246.94]  // Em
+    ];
+
+    const playNote = () => {
+      if (!this.isPlaying) return;
+      const now = this.ctx.currentTime;
+      const chords = this.mode === 1 ? chordsEp1 : chordsEp2;
+      const currentChord = chords[Math.floor(this.step / 4) % chords.length];
+      const freq = currentChord[this.step % currentChord.length];
+
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = this.mode === 1 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.005, now);
+      gain.gain.exponentialRampToValueAtTime(0.04, now + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 1.8);
+
+      this.step++;
+      this.bgmTimer = setTimeout(playNote, 650);
+    };
+
+    playNote();
+  }
+
+  stopBGM() {
+    this.isPlaying = false;
+    if (this.bgmTimer) clearTimeout(this.bgmTimer);
+    if (this.audioElement) this.audioElement.pause();
+  }
+
+  playSFX(type) {
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    if (type === 'click') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } else if (type === 'scan') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(250, now);
+      osc.frequency.linearRampToValueAtTime(750, now + 0.2);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } else if (type === 'warn') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.setValueAtTime(130, now + 0.08);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    }
+  }
+}
+
+const audio = new SoundEngine();
+
+/* ==========================================================================
+   DATA KEDUA EPISODE GAME
+   ========================================================================== */
+const EPISODES = {
+  1: {
+    title: "Episode 1: Utilitarisme (Kalkulus Kebahagiaan)",
+    hero: "Laila",
+    role: "Pengelola Koperasi Warga",
+    color: "var(--accent-blue)",
+    principle: "Pilihlah tindakan yang menghasilkan kebahagiaan terbesar bagi jumlah orang terbanyak.",
+    banner: "ep1_banner",
+    scenarios: [
+      {
+        id: "pompa_vs_obat",
+        assetKey: "scene_ep1_1",
+        title: "Dilema Kas RT: Air Bersih vs Obat Darurat",
+        context: "Anda (Laila) memegang kas darurat RT sebesar Rp 2.000.000. Hari ini, pompa air utama warga rusak total (50 KK krisis air). Di saat bersamaan, Pak Toto (lansia tanpa keluarga) kritis dan butuh obat segera seharga jumlah kas yang sama.",
+        details: {
+          investigate_1: "Teknisi Air: 'Kalau pompa tak diganti hari ini, 50 rumah tak ada air bersih selama seminggu ke depan.'",
+          investigate_2: "Dokter Puskesmas: 'Pak Toto butuh obat ini sekarang. Tanpa ini, nyawanya tidak tertolong sampai besok.'",
+          investigate_3: "Catatan Kas: Dana kas murni berasal dari iuran warga dan tidak ada cadangan lain bulan ini."
+        },
+        choices: {
+          utilitarian: {
+            label: "Perbaiki Pompa Air Utama (Selamatkan Kebutuhan 50 KK)",
+            text: "Anda memperbaiki pompa. 50 keluarga mendapat air bersih, namun Pak Toto meninggal dunia besok harinya.",
+            primaryDelta: +40, secDelta: +20, hubDelta: -15,
+            desc: "Utilitas Tinggi (Kebaikan untuk 200+ orang memenangi nasib 1 orang)."
+          },
+          personal: {
+            label: "Belikan Obat Pak Toto (Selamatkan Nyawa Lansia)",
+            text: "Pak Toto selamat. Namun 50 KK mengalami krisis air bersih selama seminggu; kekecewaan warga meluas.",
+            primaryDelta: -20, secDelta: -30, hubDelta: +20,
+            desc: "Utilitas Rendah (Menyelamatkan 1 nyawa dengan mengorbankan kesejahteraan 200 orang)."
+          },
+          compromise: {
+            label: "Bagi Dana (Sewa Pompa Darurat + Obat Subsidized)",
+            text: "Obat dibeli separuh dosis & pompa disewa sementara. Solusi tidak maksimal, air mengalir kecil & kondisi Pak Toto rentan.",
+            primaryDelta: +10, secDelta: -5, hubDelta: +5,
+            desc: "Utilitas Kompromi (Semua pihak mendapat manfaat minimal)."
+          }
+        }
+      },
+      {
+        id: "pencurian_sahabat",
+        assetKey: "scene_ep1_2",
+        title: "Pencurian di Koperasi: Sahabat Sendiri",
+        context: "Aris, sahabat kecil Anda sekaligus kasir koperasi, terbukti mengambil uang koperasi Rp 5.000.000. Ia menggunakannya untuk operasi darurat anaknya. Pengurus koperasi menuntut laporan Laila.",
+        details: {
+          investigate_1: "Aris (Menangis): 'Anakku butuh DP operasi malam itu juga, Lai. Aku janji ganti mencicil tiap bulan.'",
+          investigate_2: "Audit Koperasi: Kehilangan Rp 5 juta membuat koperasi terancam gagal bayar deviden ke 80 anggota kecil bulan ini.",
+          investigate_3: "Aturan Koperasi: Setiap penyelewengan harus dilaporkan ke polisi dan dipecat secara tidak hormat."
+        },
+        choices: {
+          utilitarian: {
+            label: "Laporkan Aris ke Polisi & Pengurus (Tegakkan Kepercayaan Koperasi)",
+            text: "Aris ditangkap dan dipecat. Kepercayaan anggota koperasi terjaga, deviden dibayarkan. Namun keluarga Aris hancur.",
+            primaryDelta: +30, secDelta: +15, hubDelta: -40,
+            desc: "Menjaga stabilitas ekonomi 80 anggota koperasi di atas nasib 1 sahabat."
+          },
+          personal: {
+            label: "Tutup-tutupi & Pakai Tabungan Pribadi Laila untuk Mengganti",
+            text: "Aris selamat dan anaknya pulih. Namun tabungan pribadi Laila habis total dan Aris menjadi ketergantungan.",
+            primaryDelta: -10, secDelta: 0, hubDelta: +30,
+            desc: "Meringankan 1 keluarga dengan mengorbankan beban finansial pribadi Laila."
+          },
+          compromise: {
+            label: "Sidang Internal Koperasi (Sanksi Potong Gaji Tanpa Polisi)",
+            text: "Aris tidak dipenjara tapi wajib kerja potong gaji. Beberapa anggota koperasi kecewa karena anggap Laila tebang pilih.",
+            primaryDelta: +15, secDelta: -10, hubDelta: 0,
+            desc: "Keseimbangan antara keadilan sistem dan kemanusiaan."
+          }
+        }
+      },
+      {
+        id: "lowongan_kerja",
+        assetKey: "scene_ep1_3",
+        title: "Lowongan Kerja: Profesional vs Pengangguran Kompleks",
+        context: "Koperasi membuka lowongan Staf Operasional. Kandidat A (Deni) sangat profesional & produktif. Kandidat B (Budi) adalah tetangga miskin beranak tiga yang terancam diusir jika tak dapat kerja.",
+        details: {
+          investigate_1: "Deni: 'Saya punya pengalaman 3 tahun. Saya bisa menaikkan keuntungan koperasi 30% dalam 6 bulan.'",
+          investigate_2: "Budi: 'Saya memang belum paham komputer, Mba Laila. Tapi tolong, anak saya belum bayar SPP 4 bulan.'",
+          investigate_3: "Proyeksi Bisnis: Jika koperasi makin menguntungkan, deviden dapat membantu puluhan warga miskin lainnya."
+        },
+        choices: {
+          utilitarian: {
+            label: "Pilih Deni yang Profesional (Maksimalkan Keuntungan Koperasi)",
+            text: "Deni membawa koperasi untung besar. Keuntungan digunakan untuk program beasiswa 10 anak warga.",
+            primaryDelta: +50, secDelta: +25, hubDelta: -10,
+            desc: "Produktivitas Deni menghasilkan surplus yang menyejahterakan lebih banyak orang."
+          },
+          personal: {
+            label: "Pilih Budi Karena Kasihan (Bantu Keluarga Tetangga)",
+            text: "Budi bekerja keras tapi sering buat kesalahan input data. Koperasi stagnan dan tidak ada bonus untuk warga.",
+            primaryDelta: -15, secDelta: -20, hubDelta: +15,
+            desc: "Menolong 1 orang miskin namun mengorbankan potensi bantuan untuk banyak warga."
+          },
+          compromise: {
+            label: "Terima Deni, Buat Pekerjaan Paruh Waktu Kasar untuk Budi",
+            text: "Koperasi tumbuh pesat bersama Deni, sementara Budi mendapat penghasilan cukup untuk bertahan hidup.",
+            primaryDelta: +35, secDelta: +15, hubDelta: +10,
+            desc: "Memaksimalkan hasil efisiensi sekaligus memberi jaring pengaman."
+          }
+        }
+      },
+      {
+        id: "isu_penggusuran",
+        assetKey: "scene_ep1_4",
+        title: "Informasi Rahasia: Rencana Proyek Jalan Tol",
+        context: "Laila tidak sengaja mendengar dokumen rahasia di balai kota: pemukiman warga tempat tinggal Laila akan dibeli murah untuk tol 6 bulan lagi. Jika dibocorkan sekarang, timbul kepanikan massal.",
+        details: {
+          investigate_1: "Dokumen Pemkot: Pembelian tanah dijadwalkan secara bertahap agar tidak memicu spekulan & gejolak harga.",
+          investigate_2: "Tetangga: Banyak warga yang baru saja ingin merenovasi rumah menggunakan pinjaman bank.",
+          investigate_3: "Dampak Umum: Kepanikan dini bisa memicu demonstrasi anarkis dan penurunan nilai jual aset warga."
+        },
+        choices: {
+          utilitarian: {
+            label: "Tahan Informasi Sampai Pengumuman Resmi (Cegah Kepanikan Massal)",
+            text: "Suasana pemukiman tetap tenang. Namun beberapa warga menyesal telah terlanjur merenovasi rumah.",
+            primaryDelta: +10, secDelta: -5, hubDelta: -20,
+            desc: "Mencegah kekacauan umum walau ada kerugian di beberapa pihak."
+          },
+          personal: {
+            label: "Bocorkan Informasi ke Seluruh Warga Sekarang",
+            text: "Warga menghentikan renovasi dan bersiap. Namun timbul unjuk rasa warga yang berujung bentrok dengan aparat.",
+            primaryDelta: -25, secDelta: -30, hubDelta: +25,
+            desc: "Kejujuran spontan yang memicu kerugian kolektif lebih besar."
+          },
+          compromise: {
+            label: "Beri Peringatan Halus ke Tokoh Warga Tanpa Pemicu Kepanikan",
+            text: "Tokoh warga secara bijak mengarahkan warga untuk menahan investasi besar tanpa memicu keresahan.",
+            primaryDelta: +45, secDelta: +20, hubDelta: +15,
+            desc: "Navigasi informasi cerdas untuk kebaikan total warga."
+          }
+        }
+      },
+      {
+        id: "ultah_vs_krisis",
+        assetKey: "scene_ep1_5",
+        title: "Pilihan Terakhir: Ulang Tahun Anak vs Krisis Bahan Pokok",
+        context: "Hari ini adalah ulang tahun ke-7 putri Laila yang sudah dijanjikan dirayakan bersama. Tiba-tiba truk pasokan beras murah untuk 100 keluarga warga terhadang di perbatasan RT karena masalah perizinan.",
+        details: {
+          investigate_1: "Anak Laila (Telepon): 'Ibu janji pulang jam 5 kan? Kue ulang tahunnya sudah siap...'",
+          investigate_2: "Sopir Truk: 'Mba Laila, kalau Anda tidak ke lokasi perizinan sekarang, beras ini akan dibawa kembali ke gudang pusat.'",
+          investigate_3: "Kondisi Warga: 100 keluarga kurang mampu mengandalkan beras murah ini untuk makan seminggu ke depan."
+        },
+        choices: {
+          utilitarian: {
+            label: "Urusi Beras Murah Warga (Utamakan Pangan 100 Keluarga)",
+            text: "Perizinan beras selesai dan 100 keluarga dapat makan. Laila pulang larut malam; putrinya tertidur sambil menangis.",
+            primaryDelta: +40, secDelta: +25, hubDelta: -25,
+            desc: "Pengorbanan perasaan pribadi demi perut 100 keluarga."
+          },
+          personal: {
+            label: "Pulang Rayakan Ulang Tahun Anak (Keluarga Nomor Satu)",
+            text: "Putri Laila sangat bahagia. Namun beras gagal dibagikan dan 100 keluarga terpaksa membeli beras mahal.",
+            primaryDelta: -30, secDelta: -25, hubDelta: +20,
+            desc: "Mengutamakan ikatan emosional primer dengan mengorbankan utilitas publik."
+          },
+          compromise: {
+            label: "Minta Bantuan Pengurus Lain + Janji Susulan ke Anak",
+            text: "Laila membantu 1 jam, melimpahkan sisanya ke rekan kerja, lalu pulang meski terlambat sebentar.",
+            primaryDelta: +20, secDelta: +10, hubDelta: 0,
+            desc: "Usaha maksimal menyeimbangkan kewajiban publik dan domestik."
+          }
+        }
+      }
+    ]
+  },
+
+  2: {
+    title: "Episode 2: Deontologi (Juru Lupa Kota Sumbra)",
+    hero: "Marcella",
+    role: "Petugas Balai Pelupaan",
+    color: "var(--accent-purple)",
+    principle: "Bertindaklah semata-mata menurut kewajiban moral dan aturan hukum mutlak, tanpa peduli seberapa menyakitkan konsekuensinya.",
+    banner: "ep2_banner",
+    scenarios: [
+      {
+        id: "verifikasi_token",
+        assetKey: "scene_ep2_1",
+        title: "Tahap 1: Verifikasi Permohonan Rani",
+        context: "Rani duduk di hadapan Marcella dengan mata sembab, menyerahkan Token Pelupaan miliknya. Ia memohon menghapus memori malam saat saudari kembarnya (Rina) jatuh dari Jembatan Kota Sumbra.",
+        details: {
+          investigate_1: "Rani (Gemetar): 'Setiap malam aku melihat tangannya terlepas... Aku tidak tahu apakah aku berusaha menariknya atau sengaja melepaskannya. Rasa bersalah ini membunuhku.'",
+          investigate_2: "Pasal 4 Hukum Sumbra: 'Ingatan yang menjadi satu-satunya bukti/saksi kunci sebuah peristiwa kematian DILARANG dihapus demi menjaga kebenaran sejarah.'",
+          investigate_3: "Sumpah Juru Lupa: 'Saya bersumpah menjunjung tinggi kebenaran objektif di atas perasaan manusiawi siapapun.'"
+        },
+        choices: {
+          deontology: {
+            label: "Tegaskan Aturan Pasal 4 (Jelaskan Kebenaran Hukum)",
+            text: "Marcella mengingatkan Rani bahwa ingatannya adalah saksi hukum tunggal atas kematian Rina yang tak boleh dimusnahkan.",
+            primaryDelta: +15, secDelta: 0,
+            desc: "Kepatuhan penuh pada aturan hukum Balai Pelupaan."
+          },
+          empathy: {
+            label: "Tunjukkan Empati & Mulai Pemindaian Awal",
+            text: "Melihat penderitaannya, Marcella melompati protokol verifikasi formal dan langsung menyiapkan alat ekstraksi.",
+            primaryDelta: -10, secDelta: -5,
+            desc: "Mengabaikan protokol resmi demi meringankan beban emosional."
+          },
+          hesitate: {
+            label: "Ragu-Ragu & Tunda Verifikasi (Minta Waktu Berpikir)",
+            text: "Marcella ragu mengambil sikap. Rani tampak semakin cemas dan frekuensi sinyal alat mulai berfluktuasi.",
+            primaryDelta: -5, secDelta: 0, hesitate: true,
+            desc: "Keraguan menyebabkan penundaan proses rekam."
+          }
+        }
+      },
+      {
+        id: "pemindaian_jembatan",
+        assetKey: "scene_ep2_2",
+        title: "Tahap 2: Ekstraksi Fragmen Memori Jembatan",
+        context: "Layar monitor menampilkan memori buram: Hujan lebat di Jembatan Sumbra. Dua tangan saling menggenggam di atas pembatas jembatan. Satu tangan perlahan tergelincir.",
+        details: {
+          investigate_1: "Analisis Visual Monitor: Tangan Rina licin oleh air hujan. Tangan Rani gemetar hebat sebelum genggaman terputus.",
+          investigate_2: "Rekaman Suara Memori: Terdengar samar suara Rina berteriak: 'Rani, lepaskan! Kamu ikut jatuh nanti!'",
+          investigate_3: "Laporan Kepolisian Sumbra: Kasus ditutup sebagai 'Kecelakaan Tanpa Saksi'. Memori Rani adalah satu-satunya bukti sah yang tersisa."
+        },
+        choices: {
+          deontology: {
+            label: "Simpan Rekaman ke Arsip Permanen (Kunci Bukti)",
+            text: "Marcella mengunci fragmen memori ini ke database arsip kota agar tak bisa diubah atau dihapus.",
+            primaryDelta: +15, secDelta: +10,
+            desc: "Menjaga kebenaran objektif bahwa Rina meminta dilepaskan agar Rani selamat."
+          },
+          empathy: {
+            label: "Isolasi Memori untuk Persiapan Penghapusan Total",
+            text: "Marcella mengisolasi file memori tersebut ke ruang pemusnahan tanpa mencatatnya ke arsip kebenaran.",
+            primaryDelta: -15, secDelta: -20,
+            desc: "Menyiapkan pemusnahan bukti demi kedamaian Rani."
+          },
+          hesitate: {
+            label: "Tunda Penguncian File (Biarkan Sinyal Mengambang)",
+            text: "Marcella ragu mengunci file. Sinyal ekstraksi bergetar hebat; sebagian piksel memori jembatan mulai buram.",
+            primaryDelta: -5, secDelta: -10, hesitate: true,
+            desc: "Penundaan merusak integritas fisik rekam ingatan."
+          }
+        }
+      },
+      {
+        id: "konfrontasi_hendra",
+        assetKey: "scene_ep2_3",
+        title: "Tahap 3: Konfrontasi Penjaga Senior (Hendra)",
+        context: "Hendra masuk ke ruang kerja, melihat nama berkas Rani di monitor. Wajahnya mengeras. 'Marcella! Kamu tahu persis ingatan itu tak boleh dihapus. Tugas kita menjaga kebenaran, bukan menjadi dewa penolong!'",
+        details: {
+          investigate_1: "Hendra (Tegas): 'Jika setiap orang boleh menghapus kenangan kelam yang berisi kebenaran, Kota Sumbra akan berdiri di atas tumpukan kebohongan!'",
+          investigate_2: "Argumen Rani: 'Kebenaran ini tidak berguna jika hanya membuatku ingin mengakhiri hidup setiap malam!'",
+          investigate_3: "Dilema Kantian: Apakah bohong/menghilangkan kebenaran pernah dibenarkan, walaupun untuk alasan kemanusiaan?"
+        },
+        choices: {
+          deontology: {
+            label: "Dukung Teguran Hendra (Patuhi Kewajiban Tugas)",
+            text: "Marcella menegaskan pada Rani bahwa kebenaran fakta tidak boleh dikorbankan atas alasan apapun.",
+            primaryDelta: +20, secDelta: +10,
+            desc: "Berdiri tegak bersama aturan dan integritas institusi."
+          },
+          empathy: {
+            label: "Debat Hendra (Bela Hak Kemanusiaan Rani)",
+            text: "Marcella berargumen bahwa penderitaan hidup manusia lebih berharga daripada catatan hukum dingin di atas kertas.",
+            primaryDelta: -20, secDelta: -15,
+            desc: "Menentang otoritas senior demi penderitaan pemohon."
+          },
+          hesitate: {
+            label: "Diam & Biarkan Hendra & Rani Bersitegang",
+            text: "Marcella tidak mengambil keputusan saat konfrontasi. Waktu berlalu; mesin rekam yang over-heat mulai merusak data.",
+            primaryDelta: -10, secDelta: -10, hesitate: true,
+            desc: "Sikap pasif memperburuk stabilitas sistem ingatan."
+          }
+        }
+      },
+      {
+        id: "catatan_rina",
+        assetKey: "scene_ep2_4",
+        title: "Tahap 4: Penemuan Bukti Surat Rina",
+        context: "Di saku jaket Rina saat kejadian, polisi pernah menemukan lipatan kertas basah yang baru diserahkan laboratorium hari ini: 'Rani, maafkan aku yang selalu menjadi bebanmu...'",
+        details: {
+          investigate_1: "Isi Catatan: Rina memang berencana mengakhiri hidupnya di jembatan malam itu, bukan kecelakaan murni.",
+          investigate_2: "Dampak Pada Rani: Jika Rani tahu surat ini, ia tahu saudarinya berniat bunuh diri, tapi penderitaannya belum tentu hilang.",
+          investigate_3: "Perspektif Deontologi: Kejujuran menyampaikan fakta surat ini adalah kewajiban mutlak Marcella sebagai petugas."
+        },
+        choices: {
+          deontology: {
+            label: "Bacakan Surat Rina Secara Jujur Kepada Rani",
+            text: "Marcella menyampaikan fakta surat itu. Rani menangis histeris mengetahui saudarinya memang berniat bunuh diri.",
+            primaryDelta: +15, secDelta: +20,
+            desc: "Menyampaikan kebenaran penuh tanpa ada yang disembunyikan."
+          },
+          empathy: {
+            label: "Sembunyikan Surat Agar Beban Rani Tidak Makin Berat",
+            text: "Marcella menyembunyikan surat itu agar Rani tidak makin hancur secara emosional.",
+            primaryDelta: -15, secDelta: -25,
+            desc: "Sengaja menyembunyikan fakta demi melindungi perasaan."
+          },
+          hesitate: {
+            label: "Simpan Surat Tanpa Memberitahu Siapapun Dulu",
+            text: "Marcella menunda keputusan memperlihatkan surat. Ketidakpastian makin meracuni pikiran Rani.",
+            primaryDelta: -5, secDelta: -5, hesitate: true,
+            desc: "Menunda penyampaian kebenaran mutlak."
+          }
+        }
+      },
+      {
+        id: "altar_pelupaan",
+        assetKey: "scene_ep2_5",
+        title: "Tahap 5: Eksekusi Akhir di Altar Pelupaan",
+        context: "Jari Marcella berada di atas tuas utama Mesin Pelupaan. Hendra mengawasi dari pintu. Rani menatap Marcella dengan tatapan memohon kepasrahan.",
+        details: {
+          investigate_1: "Opsi A (Tolak): Patuhi Hukum Sumbra. Kebenaran utuh, tapi Rani membawa penderitaannya selamanya.",
+          investigate_2: "Opsi B (Kabulkan): Hapus ingatan jembatan. Rani tenang, tetapi kebenaran tewasnya Rina terhapus dari dunia.",
+          investigate_3: "Opsi C (Ragu/Gagal): Jika Marcella terus ragu, radiasi mesin akan merusak saraf ingatan Rani secara permanen."
+        },
+        choices: {
+          deontology: {
+            label: "TOLAK PERMOHONAN (Jaga Kebenaran & Patuhi Hukum Mutlak)",
+            text: "Marcella menurunkan tuas pembatalan. Permohonan ditolak secara resmi demi menjaga kebenaran saksi hukum.",
+            primaryDelta: +30, secDelta: +20,
+            desc: "Keputusan Deontologis Sejati: Aturan dan Kebenaran di atas segalanya."
+          },
+          empathy: {
+            label: "KABULKAN PENGHAPUSAN (Langgar Tugas Demi Belas Kasih)",
+            text: "Marcella menekan tombol eksekusi. Ingatan malam jembatan terhapus total dari otak Rani.",
+            primaryDelta: -30, secDelta: -50,
+            desc: "Melanggar Sumpah Juru Lupa demi membebaskan Rani dari rasa sakit."
+          },
+          hesitate: {
+            label: "BIARKAN PROSES TIMEOUT (Terlalu Lama Ragu-Ragu)",
+            text: "Marcella berdiam diri terlalu lama di depan tombol. Sinyal overload memicu kegagalan sistem pelupaan!",
+            primaryDelta: -20, secDelta: -30, hesitate: true,
+            desc: "Keraguan fatal yang merusak struktur memori Rani."
+          }
+        }
+      }
+    ]
+  }
+};
+
+/* ==========================================================================
+   GAME STATE & ENGINE
+   ========================================================================== */
+const GAME = {
+  currentEp: 1,
+  state: {
+    index: 0,
+    score1: 0,
+    score2: 50,
+    score3: 50,
+    history: [],
+    inspectionsDone: [],
+    dialogueHistory: []
+  }
+};
+
+const $ = s => document.querySelector(s);
+
+function renderArt(key, altText) {
+  if (ASSETS[key] && ASSETS[key].trim() !== "") {
+    return `<div class="art-container"><img src="${ASSETS[key]}" alt="${altText}"></div>`;
+  }
+  return `
+    <div class="art-container">
+      <div class="placeholder-art">
+        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 6px;display:block;opacity:0.6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+        </svg>
+        <b>[ Tempat Ilustrasi: ${key} ]</b><br>
+        <span>${altText}</span>
+      </div>
+    </div>
+  `;
+}
+
+function toggleAudio() {
+  const active = audio.toggleBGM();
+  const btn = $('#audioBtn');
+  if (btn) btn.innerText = active ? "🔊 Musik: ON" : "🔇 Musik: OFF";
+}
+
+function init() {
+  renderTitle();
+}
+
+function renderTitle() {
+  document.documentElement.style.setProperty('--ep-color', 'var(--accent-blue)');
+  $('#app').innerHTML = `
+    <div class="card">
+      ${renderArt('title_cover', 'Cover Utama Game')}
+      <h1>Dilema Moral: Tentukan Hidupmu</h1>
+      <p style="color:var(--text-muted)">Game Naratif Interaktif Etika Terapan</p>
+      <hr style="border-color:var(--border-color);margin:16px 0">
+      
+      <h2>Pilih Episode Game</h2>
+      <div class="btn-group">
+        <button class="choice-btn" onclick="audio.playSFX('click'); startEpisode(1)">
+          <b>Episode 1: Utilitarisme — Demi Kebaikan Bersama</b><br>
+          <small style="color:var(--text-muted)">Tokoh Utama: Laila (Pengelola Koperasi) | Kalkulus Kebahagiaan</small>
+        </button>
+
+        <button class="choice-btn" onclick="audio.playSFX('click'); startEpisode(2)">
+          <b>Episode 2: Deontologi — Juru Lupa Kota Sumbra</b><br>
+          <small style="color:var(--text-muted)">Tokoh Utama: Marcella (Balai Pelupaan) | Hukum & Kebenaran Mutlak</small>
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function startEpisode(epNum) {
+  GAME.currentEp = epNum;
+  const ep = EPISODES[epNum];
+  document.documentElement.style.setProperty('--ep-color', ep.color);
+
+  GAME.state = {
+    index: 0,
+    score1: epNum === 1 ? 0 : 50,  
+    score2: epNum === 1 ? 50 : 100, 
+    score3: epNum === 1 ? 50 : 0,   
+    history: [],
+    inspectionsDone: [],
+    dialogueHistory: []
+  };
+
+  $('#app').innerHTML = `
+    <div class="card">
+      ${renderArt(ep.banner, ep.title)}
+      <h2>${ep.title}</h2>
+      <p><b>Prinsip Utama:</b> <i>"${ep.principle}"</i></p>
+      <p>Anda berperan sebagai <b>${ep.hero}</b> (${ep.role}).</p>
+      <button class="primary" onclick="audio.playSFX('click'); audio.startBGM(${epNum}); renderScenario()" style="margin-top:10px">
+        Mulai Episode (~10 min)
+      </button>
+    </div>
+  `;
+}
+
+function renderHUD() {
+  const s = GAME.state;
+  const epNum = GAME.currentEp;
+
+  if (epNum === 1) {
+    return `
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-label">Kasus</span>
+          <span class="hud-val">${s.index + 1} / 5</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Net Utilitas ($U$)</span>
+          <span class="hud-val ${s.score1 < 0 ? 'neg' : ''}">${s.score1 > 0 ? '+' : ''}${s.score1} U</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Warga</span>
+          <span class="hud-val">${s.score2}%</span>
+        </div>
+        <button id="audioBtn" class="sound-btn" onclick="toggleAudio()">
+          ${audio.isPlaying ? "🔊 Musik: ON" : "🔇 Musik: OFF"}
+        </button>
+      </div>
+    `;
+  } else {
+    return `
+      <div class="hud">
+        <div class="hud-item">
+          <span class="hud-label">Tahap</span>
+          <span class="hud-val">${s.index + 1} / 5</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Kewajiban ($D$)</span>
+          <span class="hud-val">${s.score1}%</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Kebenaran</span>
+          <span class="hud-val ${s.score2 < 50 ? 'neg' : ''}">${s.score2}%</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">Keraguan</span>
+          <span class="hud-val ${s.score3 > 0 ? 'neg' : ''}">${s.score3}x</span>
+        </div>
+        <button id="audioBtn" class="sound-btn" onclick="toggleAudio()">
+          ${audio.isPlaying ? "🔊 Musik: ON" : "🔇 Musik: OFF"}
+        </button>
+      </div>
+    `;
+  }
+}
+
+function renderScenario() {
+  const ep = EPISODES[GAME.currentEp];
+  const sc = ep.scenarios[GAME.state.index];
+  const s = GAME.state;
+
+  $('#app').innerHTML = `
+    ${renderHUD()}
+    <div class="card">
+      ${renderArt(sc.assetKey, sc.title)}
+      <h3>${sc.title}</h3>
+      <p style="margin-bottom:16px">${sc.context}</p>
+
+      <h4 style="font-size:0.9rem;color:var(--ep-color);margin-bottom:8px">Penyelidikan & Fakta Lapangan:</h4>
+      <div class="log-box" id="logBox">
+        <div class="log-entry"><b>Sistem:</b> Pelajari fakta-fakta sebelum mengambil keputusan etika.</div>
+        ${s.dialogueHistory.map(d => `<div class="log-entry"><b>${d.label}:</b> ${d.text}</div>`).join('')}
+      </div>
+
+      <div class="btn-group" style="flex-direction:row;flex-wrap:wrap">
+        <button class="action-btn" onclick="investigate(1)" ${s.inspectionsDone.includes(1) ? 'disabled' : ''}>Pemeriksaan 1</button>
+        <button class="action-btn" onclick="investigate(2)" ${s.inspectionsDone.includes(2) ? 'disabled' : ''}>Pemeriksaan 2</button>
+        <button class="action-btn" onclick="investigate(3)" ${s.inspectionsDone.includes(3) ? 'disabled' : ''}>Analisis Fakta</button>
+      </div>
+
+      <h4 style="font-size:0.9rem;color:var(--accent-amber);margin:20px 0 8px">Tindakan ${ep.hero}:</h4>
+      <div class="btn-group">
+        <button class="choice-btn" onclick="makeChoice('deontology', 'utilitarian')">
+          ${sc.choices.utilitarian ? sc.choices.utilitarian.label : sc.choices.deontology.label}
+        </button>
+        <button class="choice-btn" onclick="makeChoice('empathy', 'personal')">
+          ${sc.choices.personal ? sc.choices.personal.label : sc.choices.empathy.label}
+        </button>
+        <button class="choice-btn" onclick="makeChoice('hesitate', 'compromise')">
+          ${sc.choices.compromise ? sc.choices.compromise.label : sc.choices.hesitate.label}
+        </button>
+      </div>
+    </div>
+  `;
+
+  const log = $('#logBox');
+  if (log) log.scrollTop = log.scrollHeight;
+}
+
+function investigate(num) {
+  audio.playSFX('scan');
+  const sc = EPISODES[GAME.currentEp].scenarios[GAME.state.index];
+  GAME.state.inspectionsDone.push(num);
+
+  const text = sc.details[`investigate_${num}`];
+  GAME.state.dialogueHistory.push({ label: `Fakta ${num}`, text });
+  renderScenario();
+}
+
+function makeChoice(keyEp2, keyEp1) {
+  const epNum = GAME.currentEp;
+  const key = epNum === 1 ? keyEp1 : keyEp2;
+  const sc = EPISODES[epNum].scenarios[GAME.state.index];
+  const choice = sc.choices[key];
+
+  if (choice.hesitate) {
+    audio.playSFX('warn');
+    GAME.state.score3++;
+  } else {
+    audio.playSFX('click');
+  }
+
+  if (epNum === 1) {
+    GAME.state.score1 += choice.primaryDelta;
+    GAME.state.score2 = Math.max(0, Math.min(100, GAME.state.score2 + choice.secDelta));
+    GAME.state.score3 = Math.max(0, Math.min(100, GAME.state.score3 + choice.hubDelta));
+  } else {
+    GAME.state.score1 = Math.max(0, Math.min(100, GAME.state.score1 + choice.primaryDelta));
+    GAME.state.score2 = Math.max(0, Math.min(100, GAME.state.score2 + choice.secDelta));
+  }
+
+  GAME.state.history.push({
+    title: sc.title,
+    chosenLabel: choice.label,
+    outcomeText: choice.text,
+    desc: choice.desc
+  });
+
+  $('#app').innerHTML = `
+    ${renderHUD()}
+    <div class="card">
+      <h3>Hasil Keputusan ${EPISODES[epNum].hero}</h3>
+      <p style="font-size:1.05rem;color:var(--accent-amber);margin:14px 0">"${choice.text}"</p>
+
+      <table class="ledger-table">
+        <tr><th>Parameter Etika</th><th>Dampak</th></tr>
+        <tr><td>${epNum === 1 ? 'Dampak Net Utilitas ($U$)' : 'Skor Kewajiban ($D$)'}</td><td>${choice.primaryDelta > 0 ? '+' : ''}${choice.primaryDelta}</td></tr>
+        <tr><td>${epNum === 1 ? 'Kesejahteraan Warga' : 'Kebenaran Mutlak'}</td><td>${choice.secDelta > 0 ? '+' : ''}${choice.secDelta}%</td></tr>
+      </table>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px"><i>Catatan Prinsip: ${choice.desc}</i></p>
+
+      <button class="primary" onclick="audio.playSFX('click'); nextScenario()" style="margin-top:16px;width:100%">
+        ${GAME.state.index + 1 < 5 ? "Lanjut ke Kasus Berikutnya" : "Lihat Keputusan Akhir"}
+      </button>
+    </div>
+  `;
+}
+
+function nextScenario() {
+  GAME.state.index++;
+  GAME.state.inspectionsDone = [];
+  GAME.state.dialogueHistory = [];
+
+  if (GAME.state.index < 5) {
+    renderScenario();
+  } else {
+    renderSummary();
+  }
+}
+
+function renderSummary() {
+  const s = GAME.state;
+  const epNum = GAME.currentEp;
+  let assetEnding = "";
+  let titleEnding = "";
+  let evalText = "";
+
+  if (epNum === 1) {
+    if (s.score1 >= 120) {
+      assetEnding = "ending_ep1_high";
+      titleEnding = "Utilitaris Sejati — Kebaikan Kolektif Maksimal";
+      evalText = "Laila berhasil mengambil keputusan rasional demi kesejahteraan sebagian besar warga. Pemukiman warga secara keseluruhan tumbuh dan selamat dari krisis.";
+    } else if (s.score1 >= 40) {
+      assetEnding = "ending_ep1_mid";
+      titleEnding = "Pemimpin Kompromis — Keseimbangan Rentan";
+      evalText = "Laila berusaha menyeimbangkan antara aturan utilitas dan perasaan pribadi. Hasilnya cukup stabil bagi warga.";
+    } else {
+      assetEnding = "ending_ep1_low";
+      titleEnding = "Pilihan Emosional — Kegagalan Utilitas";
+      evalText = "Keputusan Laila lebih banyak didorong oleh rasa kasihan dan ikatan pribadi. Sebagian besar warga mengalami dampak krisis.";
+    }
+  } else {
+    if (s.score3 >= 3) {
+      assetEnding = "ending_ep2_corrupt";
+      titleEnding = "ENDING 3: INGATAN KERAPUHAN (Dampak Keraguan)";
+      evalText = "Akibat keraguan Marcella yang berlarut-larut, sinyal gelombang memori mengalami overload. Ingatan Rani terdistorsi dan terfragmentasi. Rani lupa nama saudarinya, namun penderitaan emosionalnya tetap menghantuinya.";
+    } else if (s.score1 >= 60) {
+      assetEnding = "ending_ep2_deon";
+      titleEnding = "ENDING 1: PENJAGA KEBENARAN MUTLAK (Deontologi Sejati)";
+      evalText = "Marcella menaati Sumpah Juru Lupa dan Hukum Kota Sumbra secara mutlak. Permohonan Rani ditolak. Kebenaran tewasnya Rina tetap utuh di dalam sejarah kota.";
+    } else {
+      assetEnding = "ending_ep2_mercy";
+      titleEnding = "ENDING 2: BELAS KASIH YANG MENGAPUS SEJARAH (Pelanggaran Tugas)";
+      evalText = "Marcella melanggar sumpah profesinya demi belas kasih. Rani tenang tanpa beban ingatan jembatan, namun kebenaran tewasnya Rina terhapus selamanya dari dunia.";
+    }
+  }
+
+  $('#app').innerHTML = `
+    <div class="card">
+      ${renderArt(assetEnding, titleEnding)}
+      <h2>Akhir Episode ${epNum}: Audit Keputusan</h2>
+      <h3 style="color:var(--ep-color)">${titleEnding}</h3>
+      <p style="margin:12px 0">${evalText}</p>
+
+      <div style="background:rgba(0,0,0,0.4);padding:14px;border-radius:8px;margin:16px 0">
+        ${epNum === 1 ? `
+          <p><b>Total Skor Utilitas ($U$):</b> ${s.score1} U</p>
+          <p><b>Kesejahteraan Warga:</b> ${s.score2}%</p>
+          <p><b>Hubungan Personal Laila:</b> ${s.score3}%</p>
+        ` : `
+          <p><b>Skor Kewajiban ($D$):</b> ${s.score1}%</p>
+          <p><b>Kebenaran Mutlak:</b> ${s.score2}%</p>
+          <p><b>Tingkat Keraguan Marcella:</b> ${s.score3} kali</p>
+        `}
+      </div>
+
+      <h4>Rekapitulasi Tindakan ${EPISODES[epNum].hero}:</h4>
+      <table class="ledger-table">
+        <tr><th>Tahap</th><th>Pilihan</th></tr>
+        ${s.history.map(h => `
+          <tr>
+            <td>${h.title}</td>
+            <td>${h.chosenLabel}</td>
+          </tr>
+        `).join('')}
+      </table>
+
+      <div class="btn-group" style="margin-top:20px">
+        <button class="primary" onclick="audio.playSFX('click'); startEpisode(${epNum})">Ulangi Episode ${epNum}</button>
+        <button onclick="audio.playSFX('click'); renderTitle()">Kembali ke Menu Utama</button>
+      </div>
+    </div>
+  `;
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
