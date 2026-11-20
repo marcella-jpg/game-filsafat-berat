@@ -1,477 +1,1587 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Berlin’s Mandarin Portal</title>
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<title>Dilema Moral: Tentukan Hidupmu (Multiplayer Paralel)</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!-- Firebase Compat SDK untuk GitHub Pages (Static Hosting) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
-:root{
-  --bg:#fbf7f0; --surface:#ffffff; --text:#1d2b2a; --muted:#5f716f;
-  --teal:#0f9d9a; --teal-soft:#d9f2f0; --orange:#ff8a3d; --orange-soft:#ffe9da;
-  --ok:#1f9d55; --ok-soft:#dcf5e5; --bad:#d64545; --bad-soft:#fde2e2;
-  --shadow:0 6px 20px rgba(15,157,154,.12);
-  color-scheme: light;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
+:root {
+  --bg-color: #0d121d;
+  --card-bg: #151d2a;
+  --text-main: #e2e8f0;
+  --text-muted: #8094ae;
+  --border-color: #233246;
+  --accent-blue: #38bdf8;
+  --accent-purple: #c084fc;
+  --accent-red: #f87171;
+  --accent-amber: #fbbf24;
+  --accent-green: #34d399;
+  --ep-color: var(--accent-blue);
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#0f1f1e; --surface:#172d2b; --text:#eef6f4; --muted:#9bb3b0;
-    --teal:#2cc5c1; --teal-soft:#1b3f3d; --orange:#ff9a55; --orange-soft:#3b2a1e;
-    --ok:#4ade80; --ok-soft:#173a26; --bad:#ff7b7b; --bad-soft:#3c1f1f;
-    --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme: dark;
-  }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  line-height: 1.6;
+  padding: 16px;
+  min-height: 100vh;
 }
-:root[data-theme="dark"]{
-  --bg:#0f1f1e; --surface:#172d2b; --text:#eef6f4; --muted:#9bb3b0;
-  --teal:#2cc5c1; --teal-soft:#1b3f3d; --orange:#ff9a55; --orange-soft:#3b2a1e;
-  --ok:#4ade80; --ok-soft:#173a26; --bad:#ff7b7b; --bad-soft:#3c1f1f;
-  --shadow:0 6px 20px rgba(0,0,0,.35); color-scheme: dark;
+
+#app {
+  max-width: 820px;
+  margin: 0 auto;
 }
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{background:var(--bg);color:var(--text);font-family:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;margin:0}
-.hanzi{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
-.surface{background:var(--surface);box-shadow:var(--shadow);border-radius:1.5rem}
-.muted{color:var(--muted)}
-.teal{color:var(--teal)} .bg-teal{background:var(--teal)} .bg-tealsoft{background:var(--teal-soft)}
-.orange{color:var(--orange)} .bg-orange{background:var(--orange)} .bg-orangesoft{background:var(--orange-soft)}
-body.no-pinyin .pinyin{display:none !important}
-.scene{perspective:1000px}
-.inner{position:relative;width:100%;height:100%;transition:transform .6s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
-.scene.flipped .inner{transform:rotateY(180deg)}
-.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:1.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;text-align:center}
-.front{background:var(--surface);box-shadow:var(--shadow);border:2px solid var(--teal-soft)}
-.back{background:var(--teal);color:#fff;transform:rotateY(180deg);box-shadow:var(--shadow)}
-.spk{position:absolute;top:.6rem;right:.6rem;width:2.5rem;height:2.5rem;border-radius:9999px;background:var(--orange);color:#fff;border:0;cursor:pointer;display:grid;place-items:center;font-size:1.1rem;z-index:2;transition:transform .15s}
-.spk:hover{transform:scale(1.1)} .spk:active{transform:scale(.92)}
-.opt{width:100%;text-align:left;padding:.85rem 1rem;border-radius:1rem;border:2px solid var(--teal-soft);background:var(--surface);color:var(--text);font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:.65rem}
-.opt:hover:not(:disabled){border-color:var(--teal);transform:translateY(-1px)}
-.opt.ok{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
-.opt.bad{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
-.opt-badge{display:inline-flex;align-items:center;justify-content:center;width:1.65rem;height:1.65rem;border-radius:9999px;background:var(--teal-soft);color:var(--teal);font-size:.8rem;font-weight:800;flex:none}
-.opt.ok .opt-badge{background:var(--ok);color:#fff}
-.opt.bad .opt-badge{background:var(--bad);color:#fff}
-.btn{background:var(--orange);color:#fff;border:0;border-radius:9999px;padding:.7rem 1.4rem;font-weight:800;cursor:pointer;box-shadow:var(--shadow)}
-.sw{width:3.2rem;height:1.8rem;border-radius:9999px;background:var(--muted);position:relative;border:0;cursor:pointer;transition:background .2s;flex:none}
-.sw::after{content:"";position:absolute;top:.2rem;left:.2rem;width:1.4rem;height:1.4rem;border-radius:9999px;background:#fff;transition:transform .2s}
-.sw[aria-checked="true"]{background:var(--teal)}
-.sw[aria-checked="true"]::after{transform:translateX(1.4rem)}
-.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);opacity:.97}
-button:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
-.tabs{display:flex;gap:.5rem;overflow-x:auto;padding:.25rem 0}
-.tab{flex:none;padding:.55rem 1rem;border-radius:9999px;border:2px solid var(--teal-soft);background:var(--surface);color:var(--text);font-weight:800;cursor:pointer}
-.tab.on{background:var(--teal);border-color:var(--teal);color:#fff}
-.fld{width:100%;padding:.6rem .8rem;border-radius:.9rem;border:2px solid var(--teal-soft);background:var(--bg);color:var(--text);font:inherit}
-.lnk{display:inline-block;background:var(--teal);color:#fff;border-radius:9999px;padding:.4rem .9rem;font-weight:800;font-size:.85rem;text-decoration:none}
-.lnk.o{background:var(--orange)}
-.mini{background:var(--bad-soft);color:var(--bad);border:0;border-radius:9999px;padding:.3rem .7rem;font-weight:800;cursor:pointer;font-size:.8rem}
-.tchr{display:none} body.teacher .tchr{display:block}
-.tbl{width:100%;border-collapse:collapse;font-size:.9rem;min-width:34rem}
-.tbl th{text-align:left;padding:.6rem;background:var(--teal-soft);color:var(--teal)}
-.tbl td{padding:.6rem;border-top:1px solid var(--teal-soft);vertical-align:top}
-.item{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;padding:.9rem 1rem;border-radius:1rem;background:var(--surface);box-shadow:var(--shadow)}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+}
+
+h1, h2, h3 {
+  font-family: 'Lora', serif;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.55rem; color: var(--ep-color); }
+h3 { font-size: 1.25rem; }
+
+p { margin-bottom: 12px; font-size: 0.98rem; }
+
+.art-container {
+  width: 100%;
+  height: 210px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px dashed var(--border-color);
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder-art {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 10px;
+}
+
+.hud {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+  background: rgba(0,0,0,0.5);
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.hud-item { display: flex; flex-direction: column; }
+.hud-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.hud-val { font-size: 1.05rem; font-weight: 700; color: var(--ep-color); }
+.hud-val.neg { color: var(--accent-red); }
+
+.live-tracker {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  font-size: 0.82rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.player-pill {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.player-pill.done {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.player-pill.me {
+  border-color: var(--ep-color);
+  font-weight: 700;
+}
+
+.sound-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--ep-color);
+  color: var(--ep-color);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.log-box {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 110px;
+  max-height: 210px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.log-entry {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.log-entry b { color: var(--accent-amber); }
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+.input-field {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--ep-color);
+}
+
+.lobby-panel {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.room-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px dashed var(--ep-color);
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin: 14px 0;
+}
+
+.room-code-text {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--ep-color);
+}
+
+.warn-banner {
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid var(--accent-amber);
+  color: var(--accent-amber);
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+button {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--border-color);
+  border-color: var(--ep-color);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button.primary {
+  border-color: var(--ep-color);
+  color: var(--ep-color);
+  font-weight: 600;
+}
+
+button.choice-btn {
+  border-color: var(--border-color);
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+button.choice-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--text-muted);
+}
+
+button.action-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-color);
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 0.85rem;
+}
+
+.ledger-table th, .ledger-table td {
+  border: 1px solid var(--border-color);
+  padding: 9px 12px;
+  text-align: left;
+}
+
+.ledger-table th {
+  background: rgba(0,0,0,0.5);
+  color: var(--ep-color);
+}
+
+.ledger-table tr.me-row {
+  background: rgba(56, 189, 248, 0.12);
+}
 </style>
 </head>
 <body>
-<main class="max-w-3xl mx-auto px-4 pb-16">
 
-  <!-- Header -->
-  <header class="pt-6">
-    <div class="rounded-3xl p-6 text-white" style="background:linear-gradient(135deg,var(--teal),#13b8b4);box-shadow:var(--shadow)">
-      <span class="inline-block text-xs font-extrabold tracking-wide px-3 py-1 rounded-full bg-white/20" id="level"></span>
-      <h1 class="text-3xl sm:text-4xl font-extrabold mt-3"><span class="hanzi">你好</span>, <span id="name"></span>! 👋</h1>
-      <p class="mt-2 pinyin text-white/80 text-sm">Nǐ hǎo!</p>
-      <p class="mt-3 text-white/95" id="goal"></p>
-      <div class="mt-4 inline-flex items-center gap-2 rounded-2xl px-4 py-2 font-bold bg-orange text-white">📅 Next lesson: <span id="next"></span></div>
-    </div>
-  </header>
-
-  <!-- Pinyin toggle -->
-  <div class="topbar py-3 mt-2">
-    <div class="surface flex items-center justify-between px-5 py-3">
-      <div>
-        <div class="font-extrabold">Show Pinyin</div>
-        <div class="text-xs muted">Turn off to test yourself on characters</div>
-      </div>
-      <button id="pyToggle" class="sw" role="switch" aria-checked="true" aria-label="Show Pinyin"></button>
-    </div>
-  </div>
-
-  <nav class="tabs mt-3" aria-label="Sections">
-    <button class="tab on" data-p="home">🏠 Home</button>
-    <button class="tab" data-p="materials">📚 Materials</button>
-    <button class="tab" data-p="homework">📝 Homework</button>
-    <button class="tab" data-p="videos">🎬 Videos</button>
-  </nav>
-
-<div id="page-home">
-  
-  <!-- Flashcards -->
-  <section class="mt-6">
-    <h2 class="text-2xl font-extrabold">🃏 Flashcards <span class="text-base muted font-bold">· Eating &amp; Drinking</span></h2>
-    <p class="muted text-sm mt-1">Tap a card to flip it. Tap 🔊 to hear it.</p>
-    <div id="deck" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4"></div>
-  </section>
-
-  <!-- Quiz -->
-  <section class="mt-10">
-    <div class="flex flex-wrap items-end justify-between gap-2">
-      <h2 class="text-2xl font-extrabold">✏️ Practice Quiz</h2>
-      <div class="flex items-center gap-2">
-        <div class="px-4 py-1.5 rounded-full bg-tealsoft teal font-extrabold text-sm">⏱️ Time: <span id="timer">00:00</span></div>
-        <div class="px-4 py-1.5 rounded-full bg-orangesoft orange font-extrabold text-sm">Score: <span id="score">0</span>/4</div>
-      </div>
-    </div>
-    <div class="surface p-5 mt-4" id="quiz"></div>
-  </section>
-
-  <!-- Notes -->
-  <section class="mt-10">
-    <h2 class="text-2xl font-extrabold">📝 Lesson Notes &amp; Audio Tips</h2>
-    <div class="grid sm:grid-cols-2 gap-4 mt-4">
-      <div class="surface p-5">
-        <h3 class="font-extrabold teal">Grammar from last session</h3>
-        <ul id="gramList" class="mt-3 space-y-3 text-sm">
-          <li><b>1. Word order is Subject + Verb + Object.</b><br><span class="hanzi text-lg">我喝水。</span> <span class="pinyin muted">Wǒ hē shuǐ.</span><br><span class="muted">I drink water.</span></li>
-          <li><b>2. 想 + verb = “want to …”</b><br><span class="hanzi text-lg">我想吃米饭。</span> <span class="pinyin muted">Wǒ xiǎng chī mǐfàn.</span><br><span class="muted">I want to eat rice.</span></li>
-          <li><b>3. Add 吗 to make a yes/no question.</b><br><span class="hanzi text-lg">你喝茶吗？</span> <span class="pinyin muted">Nǐ hē chá ma?</span><br><span class="muted">Do you drink tea?</span></li>
-        </ul>
-      </div>
-      <div class="surface p-5 bg-tealsoft" style="background:var(--teal-soft)">
-        <h3 class="font-extrabold orange">🎧 Audio tips</h3>
-        <ul id="tipList" class="mt-3 space-y-3 text-sm">
-          <li><b>Shadow it.</b> Play a word, pause, and repeat it right away. Copy the pitch, not just the sounds.</li>
-          <li><b>Mind the tones.</b> 水 <span class="pinyin">shuǐ</span> dips down then up (3rd tone). 茶 <span class="pinyin">chá</span> rises like a question (2nd tone).</li>
-          <li><b>Go slow, then fast.</b> Say each sentence slowly three times, then at normal speed.</li>
-          <li><b>Hide the Pinyin.</b> Try the cards with Pinyin off and see how many you recognize.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<!-- Materials -->
-<div id="page-materials" class="hidden">
-  <section class="mt-6">
-    <h2 class="text-2xl font-extrabold">📚 Materials</h2>
-    <p class="muted text-sm mt-1">PDFs and worksheets from your teacher.</p>
-    <div id="matList" class="grid gap-3 mt-4"></div>
-  </section>
-</div>
-
-<!-- Homework -->
-<div id="page-homework" class="hidden">
-  <section class="mt-6">
-    <h2 class="text-2xl font-extrabold">📝 Homework</h2>
-    <p class="muted text-sm mt-1">Tap Upload to submit your work. Scores and feedback appear in the table.</p>
-    <div class="surface mt-4 overflow-x-auto">
-      <table class="tbl">
-        <thead><tr><th>Homework</th><th>Upload</th><th>Score</th><th>Feedback</th></tr></thead>
-        <tbody id="hwBody"></tbody>
-      </table>
-    </div>
-  </section>
-</div>
-
-<!-- Videos -->
-<div id="page-videos" class="hidden">
-  <section class="mt-6">
-    <h2 class="text-2xl font-extrabold">🎬 Videos</h2>
-    <p class="muted text-sm mt-1">Class recordings and videos your teacher recommends.</p>
-    <h3 class="font-extrabold teal mt-5">🎥 Class recordings</h3>
-    <div id="recList" class="grid gap-3 mt-2"></div>
-    <h3 class="font-extrabold orange mt-6">⭐ Recommended references</h3>
-    <div id="refList" class="grid gap-3 mt-2"></div>
-  </section>
-</div>
-
-  <footer class="text-center muted text-xs mt-10">加油, <span class="berlin"></span>! Keep going 💪</footer>
-</main>
+<div id="app"></div>
 
 <script>
-const CONFIG = {
-  name: "Berlin",
-  level: "HSK 1 (3.0) · Beginner",
-  goal: "Your goal: order food and drinks in Mandarin with confidence.",
-  nextLesson: "Tue, 27 Oct 2026 · 4:00 PM"
+/* ==========================================================================
+   1. KONFIGURASI FIREBASE REALTIME DATABASE (WAJIB UNTUK MULTIPLAYER ONLINE)
+   Buat proyek gratis di console.firebase.google.com -> Realtime Database
+   Lalu tempel konfigurasi web app Anda di bawah ini.
+   ========================================================================== */
+const FIREBASE_CONFIG = {
+  apiKey: "",
+  authDomain: "",
+  databaseURL: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: ""
 };
 
-let WORDS = [
-  {h:"水", p:"shuǐ", e:"water", s:"我喝水。", sp:"Wǒ hē shuǐ.", se:"I drink water."},
-  {h:"茶", p:"chá", e:"tea", s:"他喝茶。", sp:"Tā hē chá.", se:"He drinks tea."},
-  {h:"米饭", p:"mǐfàn", e:"cooked rice", s:"我想吃米饭。", sp:"Wǒ xiǎng chī mǐfàn.", se:"I want to eat rice."},
-  {h:"苹果", p:"píngguǒ", e:"apple", s:"这是苹果。", sp:"Zhè shì píngguǒ.", se:"This is an apple."},
-  {h:"吃", p:"chī", e:"to eat", s:"我吃苹果。", sp:"Wǒ chī píngguǒ.", se:"I eat an apple."},
-  {h:"喝", p:"hē", e:"to drink", s:"你喝茶吗？", sp:"Nǐ hē chá ma?", se:"Do you drink tea?"},
-  {h:"想", p:"xiǎng", e:"to want / to think", s:"我想喝水。", sp:"Wǒ xiǎng hē shuǐ.", se:"I want to drink water."},
-  {h:"谢谢", p:"xièxie", e:"thank you", s:"谢谢你！", sp:"Xièxie nǐ!", se:"Thank you!"}
-];
+/* ==========================================================================
+   2. TEMPAT INPUT ILUSTRASI (ASSETS)
+   ========================================================================== */
+const ASSETS = {
+  title_cover: "",
+  // Episode 1 (Laila)
+  ep1_banner: "", scene_ep1_1: "", scene_ep1_2: "", scene_ep1_3: "", scene_ep1_4: "", scene_ep1_5: "",
+  ending_ep1_high: "", ending_ep1_mid: "", ending_ep1_low: "",
+  // Episode 2 (Marcella)
+  ep2_banner: "", scene_ep2_1: "", scene_ep2_2: "", scene_ep2_3: "", scene_ep2_4: "", scene_ep2_5: "",
+  ending_ep2_deon: "", ending_ep2_mercy: "", ending_ep2_corrupt: ""
+};
 
-// Header
-document.getElementById("name").textContent = CONFIG.name;
-document.getElementById("level").textContent = CONFIG.level;
-document.getElementById("goal").textContent = CONFIG.goal;
-document.getElementById("next").textContent = CONFIG.nextLesson;
-document.querySelectorAll(".berlin").forEach(el => el.textContent = CONFIG.name);
-document.title = CONFIG.name + "’s Mandarin Portal";
+/* ==========================================================================
+   3. TEMPAT INPUT AUDIO MP3
+   ========================================================================== */
+const ASSETS_AUDIO = {
+  bgm_main: ""
+};
 
-// Speech
-function speak(text){
-  if(!("speechSynthesis" in window)){ alert("Sorry, audio isn’t supported in this browser."); return; }
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "zh-CN"; u.rate = 0.8;
-  window.speechSynthesis.speak(u);
+/* ==========================================================================
+   INISIALISASI FIREBASE
+   ========================================================================== */
+let db = null;
+const isFirebaseReady = Boolean(FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.databaseURL);
+
+if (isFirebaseReady && typeof firebase !== "undefined") {
+  try {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+  } catch (err) {
+    console.error("Firebase init error:", err);
+  }
 }
 
-// Pinyin toggle
-const sw = document.getElementById("pyToggle");
-sw.addEventListener("click", () => {
-  const on = sw.getAttribute("aria-checked") !== "true";
-  sw.setAttribute("aria-checked", String(on));
-  document.body.classList.toggle("no-pinyin", !on);
-});
+/* ==========================================================================
+   AUDIO ENGINE (SYNTHESIZER)
+   ========================================================================== */
+class SoundEngine {
+  constructor() {
+    this.ctx = null;
+    this.isPlaying = false;
+    this.audioElement = null;
+    this.bgmTimer = null;
+    this.step = 0;
+    this.mode = 1;
+  }
 
-// Flashcards
-const deck = document.getElementById("deck");
-function esc(s){ const d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
-function buildDeck(){
-  deck.textContent = "";
-  if(!WORDS.length){ deck.innerHTML = '<div class="muted text-sm p-3 col-span-2 sm:col-span-4">No words yet. Check back soon!</div>'; return; }
-  WORDS.forEach(w0 => {
-    const w = {}; for(const k in w0) w[k] = esc(w0[k]);
-    const scene = document.createElement("div");
-    scene.className = "scene h-52 relative cursor-pointer";
-    scene.tabIndex = 0;
-    scene.setAttribute("role","button");
-    scene.setAttribute("aria-label","Flashcard " + w.h + ". Press to flip.");
-    scene.innerHTML = `
-      <div class="inner">
-        <div class="face front">
-          <div class="hanzi font-extrabold" style="font-size:3.2rem;line-height:1.1">${w.h}</div>
-          <div class="muted text-xs mt-3">tap to flip</div>
+  init() {
+    if (!this.ctx) {
+      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  toggleBGM() {
+    this.init();
+    if (this.isPlaying) {
+      this.stopBGM();
+    } else {
+      this.startBGM(this.mode);
+    }
+    return this.isPlaying;
+  }
+
+  startBGM(epNum = 1) {
+    this.init();
+    this.stopBGM();
+    this.mode = epNum;
+    this.isPlaying = true;
+
+    if (ASSETS_AUDIO.bgm_main !== "") {
+      if (!this.audioElement) {
+        this.audioElement = new Audio(ASSETS_AUDIO.bgm_main);
+        this.audioElement.loop = true;
+      }
+      this.audioElement.play();
+      return;
+    }
+
+    const chordsEp1 = [
+      [261.63, 329.63, 392.00], // C
+      [220.00, 261.63, 329.63], // Am
+      [174.61, 220.00, 261.63], // F
+      [196.00, 246.94, 293.66]  // G
+    ];
+
+    const chordsEp2 = [
+      [220.00, 261.63, 329.63], // Am
+      [174.61, 220.00, 261.63], // F
+      [130.81, 164.81, 196.00], // C
+      [164.81, 196.00, 246.94]  // Em
+    ];
+
+    const playNote = () => {
+      if (!this.isPlaying) return;
+      const now = this.ctx.currentTime;
+      const chords = this.mode === 1 ? chordsEp1 : chordsEp2;
+      const currentChord = chords[Math.floor(this.step / 4) % chords.length];
+      const freq = currentChord[this.step % currentChord.length];
+
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = this.mode === 1 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq, now);
+
+      gain.gain.setValueAtTime(0.005, now);
+      gain.gain.exponentialRampToValueAtTime(0.04, now + 0.2);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now);
+      osc.stop(now + 1.8);
+
+      this.step++;
+      this.bgmTimer = setTimeout(playNote, 650);
+    };
+
+    playNote();
+  }
+
+  stopBGM() {
+    this.isPlaying = false;
+    if (this.bgmTimer) clearTimeout(this.bgmTimer);
+    if (this.audioElement) this.audioElement.pause();
+  }
+
+  playSFX(type) {
+    this.init();
+    if (!this.ctx) return;
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    if (type === 'click') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(400, now);
+      osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } else if (type === 'scan') {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(250, now);
+      osc.frequency.linearRampToValueAtTime(750, now + 0.2);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    } else if (type === 'warn') {
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(160, now);
+      osc.frequency.setValueAtTime(130, now + 0.08);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
+      osc.start(now);
+      osc.stop(now + 0.2);
+    }
+  }
+}
+
+const audio = new SoundEngine();
+
+/* ==========================================================================
+   DATA KEDUA EPISODE GAME
+   ========================================================================== */
+const EPISODES = {
+  1: {
+    title: "Episode 1: Utilitarisme (Kalkulus Kebahagiaan)",
+    hero: "Laila",
+    role: "Pengelola Koperasi Warga",
+    color: "var(--accent-blue)",
+    principle: "Pilihlah tindakan yang menghasilkan kebahagiaan terbesar bagi jumlah orang terbanyak.",
+    banner: "ep1_banner",
+    scenarios: [
+      {
+        id: "pompa_vs_obat",
+        assetKey: "scene_ep1_1",
+        title: "Dilema Kas RT: Air Bersih vs Obat Darurat",
+        context: "Anda (Laila) memegang kas darurat RT sebesar Rp 2.000.000. Hari ini, pompa air utama warga rusak total (50 KK krisis air). Di saat bersamaan, Pak Toto (lansia tanpa keluarga) kritis dan butuh obat segera seharga jumlah kas yang sama.",
+        details: {
+          investigate_1: "Teknisi Air: 'Kalau pompa tak diganti hari ini, 50 rumah tak ada air bersih selama seminggu ke depan.'",
+          investigate_2: "Dokter Puskesmas: 'Pak Toto butuh obat ini sekarang. Tanpa ini, nyawanya tidak tertolong sampai besok.'",
+          investigate_3: "Catatan Kas: Dana kas murni berasal dari iuran warga dan tidak ada cadangan lain bulan ini."
+        },
+        choices: {
+          utilitarian: {
+            label: "Perbaiki Pompa Air Utama (Selamatkan Kebutuhan 50 KK)",
+            text: "Anda memperbaiki pompa. 50 keluarga mendapat air bersih, namun Pak Toto meninggal dunia besok harinya.",
+            primaryDelta: +40, secDelta: +20, hubDelta: -15,
+            desc: "Utilitas Tinggi (Kebaikan untuk 200+ orang memenangi nasib 1 orang)."
+          },
+          personal: {
+            label: "Belikan Obat Pak Toto (Selamatkan Nyawa Lansia)",
+            text: "Pak Toto selamat. Namun 50 KK mengalami krisis air bersih selama seminggu; kekecewaan warga meluas.",
+            primaryDelta: -20, secDelta: -30, hubDelta: +20,
+            desc: "Utilitas Rendah (Menyelamatkan 1 nyawa dengan mengorbankan kesejahteraan 200 orang)."
+          },
+          compromise: {
+            label: "Bagi Dana (Sewa Pompa Darurat + Obat Subsidized)",
+            text: "Obat dibeli separuh dosis & pompa disewa sementara. Solusi tidak maksimal, air mengalir kecil & kondisi Pak Toto rentan.",
+            primaryDelta: +10, secDelta: -5, hubDelta: +5,
+            desc: "Utilitas Kompromi (Semua pihak mendapat manfaat minimal)."
+          }
+        }
+      },
+      {
+        id: "pencurian_sahabat",
+        assetKey: "scene_ep1_2",
+        title: "Pencurian di Koperasi: Sahabat Sendiri",
+        context: "Aris, sahabat kecil Anda sekaligus kasir koperasi, terbukti mengambil uang koperasi Rp 5.000.000. Ia menggunakannya untuk operasi darurat anaknya. Pengurus koperasi menuntut laporan Laila.",
+        details: {
+          investigate_1: "Aris (Menangis): 'Anakku butuh DP operasi malam itu juga, Lai. Aku janji ganti mencicil tiap bulan.'",
+          investigate_2: "Audit Koperasi: Kehilangan Rp 5 juta membuat koperasi terancam gagal bayar deviden ke 80 anggota kecil bulan ini.",
+          investigate_3: "Aturan Koperasi: Setiap penyelewengan harus dilaporkan ke polisi dan dipecat secara tidak hormat."
+        },
+        choices: {
+          utilitarian: {
+            label: "Laporkan Aris ke Polisi & Pengurus (Tegakkan Kepercayaan Koperasi)",
+            text: "Aris ditangkap dan dipecat. Kepercayaan anggota koperasi terjaga, deviden dibayarkan. Namun keluarga Aris hancur.",
+            primaryDelta: +30, secDelta: +15, hubDelta: -40,
+            desc: "Menjaga stabilitas ekonomi 80 anggota koperasi di atas nasib 1 sahabat."
+          },
+          personal: {
+            label: "Tutup-tutupi & Pakai Tabungan Pribadi Laila untuk Mengganti",
+            text: "Aris selamat dan anaknya pulih. Namun tabungan pribadi Laila habis total dan Aris menjadi ketergantungan.",
+            primaryDelta: -10, secDelta: 0, hubDelta: +30,
+            desc: "Meringankan 1 keluarga dengan mengorbankan beban finansial pribadi Laila."
+          },
+          compromise: {
+            label: "Sidang Internal Koperasi (Sanksi Potong Gaji Tanpa Polisi)",
+            text: "Aris tidak dipenjara tapi wajib kerja potong gaji. Beberapa anggota koperasi kecewa karena anggap Laila tebang pilih.",
+            primaryDelta: +15, secDelta: -10, hubDelta: 0,
+            desc: "Keseimbangan antara keadilan sistem dan kemanusiaan."
+          }
+        }
+      },
+      {
+        id: "lowongan_kerja",
+        assetKey: "scene_ep1_3",
+        title: "Lowongan Kerja: Profesional vs Pengangguran Kompleks",
+        context: "Koperasi membuka lowongan Staf Operasional. Kandidat A (Deni) sangat profesional & produktif. Kandidat B (Budi) adalah tetangga miskin beranak tiga yang terancam diusir jika tak dapat kerja.",
+        details: {
+          investigate_1: "Deni: 'Saya punya pengalaman 3 tahun. Saya bisa menaikkan keuntungan koperasi 30% dalam 6 bulan.'",
+          investigate_2: "Budi: 'Saya memang belum paham komputer, Mba Laila. Tapi tolong, anak saya belum bayar SPP 4 bulan.'",
+          investigate_3: "Proyeksi Bisnis: Jika koperasi makin menguntungkan, deviden dapat membantu puluhan warga miskin lainnya."
+        },
+        choices: {
+          utilitarian: {
+            label: "Pilih Deni yang Profesional (Maksimalkan Keuntungan Koperasi)",
+            text: "Deni membawa koperasi untung besar. Keuntungan digunakan untuk program beasiswa 10 anak warga.",
+            primaryDelta: +50, secDelta: +25, hubDelta: -10,
+            desc: "Produktivitas Deni menghasilkan surplus yang menyejahterakan lebih banyak orang."
+          },
+          personal: {
+            label: "Pilih Budi Karena Kasihan (Bantu Keluarga Tetangga)",
+            text: "Budi bekerja keras tapi sering buat kesalahan input data. Koperasi stagnan dan tidak ada bonus untuk warga.",
+            primaryDelta: -15, secDelta: -20, hubDelta: +15,
+            desc: "Menolong 1 orang miskin namun mengorbankan potensi bantuan untuk banyak warga."
+          },
+          compromise: {
+            label: "Terima Deni, Buat Pekerjaan Paruh Waktu Kasar untuk Budi",
+            text: "Koperasi tumbuh pesat bersama Deni, sementara Budi mendapat penghasilan cukup untuk bertahan hidup.",
+            primaryDelta: +35, secDelta: +15, hubDelta: +10,
+            desc: "Memaksimalkan hasil efisiensi sekaligus memberi jaring pengaman."
+          }
+        }
+      },
+      {
+        id: "isu_penggusuran",
+        assetKey: "scene_ep1_4",
+        title: "Informasi Rahasia: Rencana Proyek Jalan Tol",
+        context: "Laila tidak sengaja mendengar dokumen rahasia di balai kota: pemukiman warga tempat tinggal Laila akan dibeli murah untuk tol 6 bulan lagi. Jika dibocorkan sekarang, timbul kepanikan massal.",
+        details: {
+          investigate_1: "Dokumen Pemkot: Pembelian tanah dijadwalkan secara bertahap agar tidak memicu spekulan & gejolak harga.",
+          investigate_2: "Tetangga: Banyak warga yang baru saja ingin merenovasi rumah menggunakan pinjaman bank.",
+          investigate_3: "Dampak Umum: Kepanikan dini bisa memicu demonstrasi anarkis dan penurunan nilai jual aset warga."
+        },
+        choices: {
+          utilitarian: {
+            label: "Tahan Informasi Sampai Pengumuman Resmi (Cegah Kepanikan Massal)",
+            text: "Suasana pemukiman tetap tenang. Namun beberapa warga menyesal telah terlanjur merenovasi rumah.",
+            primaryDelta: +10, secDelta: -5, hubDelta: -20,
+            desc: "Mencegah kekacauan umum walau ada kerugian di beberapa pihak."
+          },
+          personal: {
+            label: "Bocorkan Informasi ke Seluruh Warga Sekarang",
+            text: "Warga menghentikan renovasi dan bersiap. Namun timbul unjuk rasa warga yang berujung bentrok dengan aparat.",
+            primaryDelta: -25, secDelta: -30, hubDelta: +25,
+            desc: "Kejujuran spontan yang memicu kerugian kolektif lebih besar."
+          },
+          compromise: {
+            label: "Beri Peringatan Halus ke Tokoh Warga Tanpa Pemicu Kepanikan",
+            text: "Tokoh warga secara bijak mengarahkan warga untuk menahan investasi besar tanpa memicu keresahan.",
+            primaryDelta: +45, secDelta: +20, hubDelta: +15,
+            desc: "Navigasi informasi cerdas untuk kebaikan total warga."
+          }
+        }
+      },
+      {
+        id: "ultah_vs_krisis",
+        assetKey: "scene_ep1_5",
+        title: "Pilihan Terakhir: Ulang Tahun Anak vs Krisis Bahan Pokok",
+        context: "Hari ini adalah ulang tahun ke-7 putri Laila yang sudah dijanjikan dirayakan bersama. Tiba-tiba truk pasokan beras murah untuk 100 keluarga warga terhadang di perbatasan RT karena masalah perizinan.",
+        details: {
+          investigate_1: "Anak Laila (Telepon): 'Ibu janji pulang jam 5 kan? Kue ulang tahunnya sudah siap...'",
+          investigate_2: "Sopir Truk: 'Mba Laila, kalau Anda tidak ke lokasi perizinan sekarang, beras ini akan dibawa kembali ke gudang pusat.'",
+          investigate_3: "Kondisi Warga: 100 keluarga kurang mampu mengandalkan beras murah ini untuk makan seminggu ke depan."
+        },
+        choices: {
+          utilitarian: {
+            label: "Urusi Beras Murah Warga (Utamakan Pangan 100 Keluarga)",
+            text: "Perizinan beras selesai dan 100 keluarga dapat makan. Laila pulang larut malam; putrinya tertidur sambil menangis.",
+            primaryDelta: +40, secDelta: +25, hubDelta: -25,
+            desc: "Pengorbanan perasaan pribadi demi perut 100 keluarga."
+          },
+          personal: {
+            label: "Pulang Rayakan Ulang Tahun Anak (Keluarga Nomor Satu)",
+            text: "Putri Laila sangat bahagia. Namun beras gagal dibagikan dan 100 keluarga terpaksa membeli beras mahal.",
+            primaryDelta: -30, secDelta: -25, hubDelta: +20,
+            desc: "Mengutamakan ikatan emosional primer dengan mengorbankan utilitas publik."
+          },
+          compromise: {
+            label: "Minta Bantuan Pengurus Lain + Janji Susulan ke Anak",
+            text: "Laila membantu 1 jam, melimpahkan sisanya ke rekan kerja, lalu pulang meski terlambat sebentar.",
+            primaryDelta: +20, secDelta: +10, hubDelta: 0,
+            desc: "Usaha maksimal menyeimbangkan kewajiban publik dan domestik."
+          }
+        }
+      }
+    ]
+  },
+
+  2: {
+    title: "Episode 2: Deontologi (Juru Lupa Kota Sumbra)",
+    hero: "Marcella",
+    role: "Petugas Balai Pelupaan",
+    color: "var(--accent-purple)",
+    principle: "Bertindaklah semata-mata menurut kewajiban moral dan aturan hukum mutlak, tanpa peduli seberapa menyakitkan konsekuensinya.",
+    banner: "ep2_banner",
+    scenarios: [
+      {
+        id: "verifikasi_token",
+        assetKey: "scene_ep2_1",
+        title: "Tahap 1: Verifikasi Permohonan Rani",
+        context: "Rani duduk di hadapan Marcella dengan mata sembab, menyerahkan Token Pelupaan miliknya. Ia memohon menghapus memori malam saat saudari kembarnya (Rina) jatuh dari Jembatan Kota Sumbra.",
+        details: {
+          investigate_1: "Rani (Gemetar): 'Setiap malam aku melihat tangannya terlepas... Aku tidak tahu apakah aku berusaha menariknya atau sengaja melepaskannya. Rasa bersalah ini membunuhku.'",
+          investigate_2: "Pasal 4 Hukum Sumbra: 'Ingatan yang menjadi satu-satunya bukti/saksi kunci sebuah peristiwa kematian DILARANG dihapus demi menjaga kebenaran sejarah.'",
+          investigate_3: "Sumpah Juru Lupa: 'Saya bersumpah menjunjung tinggi kebenaran objektif di atas perasaan manusiawi siapapun.'"
+        },
+        choices: {
+          deontology: {
+            label: "Tegaskan Aturan Pasal 4 (Jelaskan Kebenaran Hukum)",
+            text: "Marcella mengingatkan Rani bahwa ingatannya adalah saksi hukum tunggal atas kematian Rina yang tak boleh dimusnahkan.",
+            primaryDelta: +15, secDelta: 0,
+            desc: "Kepatuhan penuh pada aturan hukum Balai Pelupaan."
+          },
+          empathy: {
+            label: "Tunjukkan Empati & Mulai Pemindaian Awal",
+            text: "Melihat penderitaannya, Marcella melompati protokol verifikasi formal dan langsung menyiapkan alat ekstraksi.",
+            primaryDelta: -10, secDelta: -5,
+            desc: "Mengabaikan protokol resmi demi meringankan beban emosional."
+          },
+          hesitate: {
+            label: "Ragu-Ragu & Tunda Verifikasi (Minta Waktu Berpikir)",
+            text: "Marcella ragu mengambil sikap. Rani tampak semakin cemas dan frekuensi sinyal alat mulai berfluktuasi.",
+            primaryDelta: -5, secDelta: 0, hesitate: true,
+            desc: "Keraguan menyebabkan penundaan proses rekam."
+          }
+        }
+      },
+      {
+        id: "pemindaian_jembatan",
+        assetKey: "scene_ep2_2",
+        title: "Tahap 2: Ekstraksi Fragmen Memori Jembatan",
+        context: "Layar monitor menampilkan memori buram: Hujan lebat di Jembatan Sumbra. Dua tangan saling menggenggam di atas pembatas jembatan. Satu tangan perlahan tergelincir.",
+        details: {
+          investigate_1: "Analisis Visual Monitor: Tangan Rina licin oleh air hujan. Tangan Rani gemetar hebat sebelum genggaman terputus.",
+          investigate_2: "Rekaman Suara Memori: Terdengar samar suara Rina berteriak: 'Rani, lepaskan! Kamu ikut jatuh nanti!'",
+          investigate_3: "Laporan Kepolisian Sumbra: Kasus ditutup sebagai 'Kecelakaan Tanpa Saksi'. Memori Rani adalah satu-satunya bukti sah yang tersisa."
+        },
+        choices: {
+          deontology: {
+            label: "Simpan Rekaman ke Arsip Permanen (Kunci Bukti)",
+            text: "Marcella mengunci fragmen memori ini ke database arsip kota agar tak bisa diubah atau dihapus.",
+            primaryDelta: +15, secDelta: +10,
+            desc: "Menjaga kebenaran objektif bahwa Rina meminta dilepaskan agar Rani selamat."
+          },
+          empathy: {
+            label: "Isolasi Memori untuk Persiapan Penghapusan Total",
+            text: "Marcella mengisolasi file memori tersebut ke ruang pemusnahan tanpa mencatatnya ke arsip kebenaran.",
+            primaryDelta: -15, secDelta: -20,
+            desc: "Menyiapkan pemusnahan bukti demi kedamaian Rani."
+          },
+          hesitate: {
+            label: "Tunda Penguncian File (Biarkan Sinyal Mengambang)",
+            text: "Marcella ragu mengunci file. Sinyal ekstraksi bergetar hebat; sebagian piksel memori jembatan mulai buram.",
+            primaryDelta: -5, secDelta: -10, hesitate: true,
+            desc: "Penundaan merusak integritas fisik rekam ingatan."
+          }
+        }
+      },
+      {
+        id: "konfrontasi_hendra",
+        assetKey: "scene_ep2_3",
+        title: "Tahap 3: Konfrontasi Penjaga Senior (Hendra)",
+        context: "Hendra masuk ke ruang kerja, melihat nama berkas Rani di monitor. Wajahnya mengeras. 'Marcella! Kamu tahu persis ingatan itu tak boleh dihapus. Tugas kita menjaga kebenaran, bukan menjadi dewa penolong!'",
+        details: {
+          investigate_1: "Hendra (Tegas): 'Jika setiap orang boleh menghapus kenangan kelam yang berisi kebenaran, Kota Sumbra akan berdiri di atas tumpukan kebohongan!'",
+          investigate_2: "Argumen Rani: 'Kebenaran ini tidak berguna jika hanya membuatku ingin mengakhiri hidup setiap malam!'",
+          investigate_3: "Dilema Kantian: Apakah bohong/menghilangkan kebenaran pernah dibenarkan, walaupun untuk alasan kemanusiaan?"
+        },
+        choices: {
+          deontology: {
+            label: "Dukung Teguran Hendra (Patuhi Kewajiban Tugas)",
+            text: "Marcella menegaskan pada Rani bahwa kebenaran fakta tidak boleh dikorbankan atas alasan apapun.",
+            primaryDelta: +20, secDelta: +10,
+            desc: "Berdiri tegak bersama aturan dan integritas institusi."
+          },
+          empathy: {
+            label: "Debat Hendra (Bela Hak Kemanusiaan Rani)",
+            text: "Marcella berargumen bahwa penderitaan hidup manusia lebih berharga daripada catatan hukum dingin di atas kertas.",
+            primaryDelta: -20, secDelta: -15,
+            desc: "Menentang otoritas senior demi penderitaan pemohon."
+          },
+          hesitate: {
+            label: "Diam & Biarkan Hendra & Rani Bersitegang",
+            text: "Marcella tidak mengambil keputusan saat konfrontasi. Waktu berlalu; mesin rekam yang over-heat mulai merusak data.",
+            primaryDelta: -10, secDelta: -10, hesitate: true,
+            desc: "Sikap pasif memperburuk stabilitas sistem ingatan."
+          }
+        }
+      },
+      {
+        id: "catatan_rina",
+        assetKey: "scene_ep2_4",
+        title: "Tahap 4: Penemuan Bukti Surat Rina",
+        context: "Di saku jaket Rina saat kejadian, polisi pernah menemukan lipatan kertas basah yang baru diserahkan laboratorium hari ini: 'Rani, maafkan aku yang selalu menjadi bebanmu...'",
+        details: {
+          investigate_1: "Isi Catatan: Rina memang berencana mengakhiri hidupnya di jembatan malam itu, bukan kecelakaan murni.",
+          investigate_2: "Dampak Pada Rani: Jika Rani tahu surat ini, ia tahu saudarinya berniat bunuh diri, tapi penderitaannya belum tentu hilang.",
+          investigate_3: "Perspektif Deontologi: Kejujuran menyampaikan fakta surat ini adalah kewajiban mutlak Marcella sebagai petugas."
+        },
+        choices: {
+          deontology: {
+            label: "Bacakan Surat Rina Secara Jujur Kepada Rani",
+            text: "Marcella menyampaikan fakta surat itu. Rani menangis histeris mengetahui saudarinya memang berniat bunuh diri.",
+            primaryDelta: +15, secDelta: +20,
+            desc: "Menyampaikan kebenaran penuh tanpa ada yang disembunyikan."
+          },
+          empathy: {
+            label: "Sembunyikan Surat Agar Beban Rani Tidak Makin Berat",
+            text: "Marcella menyembunyikan surat itu agar Rani tidak makin hancur secara emosional.",
+            primaryDelta: -15, secDelta: -25,
+            desc: "Sengaja menyembunyikan fakta demi melindungi perasaan."
+          },
+          hesitate: {
+            label: "Simpan Surat Tanpa Memberitahu Siapapun Dulu",
+            text: "Marcella menunda keputusan memperlihatkan surat. Ketidakpastian makin meracuni pikiran Rani.",
+            primaryDelta: -5, secDelta: -5, hesitate: true,
+            desc: "Menunda penyampaian kebenaran mutlak."
+          }
+        }
+      },
+      {
+        id: "altar_pelupaan",
+        assetKey: "scene_ep2_5",
+        title: "Tahap 5: Eksekusi Akhir di Altar Pelupaan",
+        context: "Jari Marcella berada di atas tuas utama Mesin Pelupaan. Hendra mengawasi dari pintu. Rani menatap Marcella dengan tatapan memohon kepasrahan.",
+        details: {
+          investigate_1: "Opsi A (Tolak): Patuhi Hukum Sumbra. Kebenaran utuh, tapi Rani membawa penderitaannya selamanya.",
+          investigate_2: "Opsi B (Kabulkan): Hapus ingatan jembatan. Rani tenang, tetapi kebenaran tewasnya Rina terhapus dari dunia.",
+          investigate_3: "Opsi C (Ragu/Gagal): Jika Marcella terus ragu, radiasi mesin akan merusak saraf ingatan Rani secara permanen."
+        },
+        choices: {
+          deontology: {
+            label: "TOLAK PERMOHONAN (Jaga Kebenaran & Patuhi Hukum Mutlak)",
+            text: "Marcella menurunkan tuas pembatalan. Permohonan ditolak secara resmi demi menjaga kebenaran saksi hukum.",
+            primaryDelta: +30, secDelta: +20,
+            desc: "Keputusan Deontologis Sejati: Aturan dan Kebenaran di atas segalanya."
+          },
+          empathy: {
+            label: "KABULKAN PENGHAPUSAN (Langgar Tugas Demi Belas Kasih)",
+            text: "Marcella menekan tombol eksekusi. Ingatan malam jembatan terhapus total dari otak Rani.",
+            primaryDelta: -30, secDelta: -50,
+            desc: "Melanggar Sumpah Juru Lupa demi membebaskan Rani dari rasa sakit."
+          },
+          hesitate: {
+            label: "BIARKAN PROSES TIMEOUT (Terlalu Lama Ragu-Ragu)",
+            text: "Marcella berdiam diri terlalu lama di depan tombol. Sinyal overload memicu kegagalan sistem pelupaan!",
+            primaryDelta: -20, secDelta: -30, hesitate: true,
+            desc: "Keraguan fatal yang merusak struktur memori Rani."
+          }
+        }
+      }
+    ]
+  }
+};
+
+/* ==========================================================================
+   4. STATE GAME & MULTIPLAYER PARALEL
+   ========================================================================== */
+const GAME = {
+  mode: "solo", // "solo" atau "multiplayer"
+  roomCode: null,
+  playerId: "p_" + Math.random().toString(36).substring(2, 9),
+  playerName: "",
+  isHost: false,
+  roomRef: null,
+  roomData: null,
+  startTime: 0,
+  currentEp: 1,
+  state: {
+    index: 0,
+    score1: 0,
+    score2: 50,
+    score3: 50,
+    history: [],
+    inspectionsDone: [],
+    dialogueHistory: []
+  }
+};
+
+const $ = s => document.querySelector(s);
+
+function esc(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatDuration(ms) {
+  const totalSec = Math.max(1, Math.floor(ms / 1000));
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}m ${String(s).padStart(2, "0")}d`;
+}
+
+function renderArt(key, altText) {
+  if (ASSETS[key] && ASSETS[key].trim() !== "") {
+    return `<div class="art-container"><img src="${ASSETS[key]}" alt="${esc(altText)}"></div>`;
+  }
+  return `
+    <div class="art-container">
+      <div class="placeholder-art">
+        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="margin:0 auto 6px;display:block;opacity:0.6">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+        </svg>
+        <b>[ Tempat Ilustrasi: ${esc(key)} ]</b><br>
+        <span>${esc(altText)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function toggleAudio() {
+  const active = audio.toggleBGM();
+  const btn = $('#audioBtn');
+  if (btn) btn.innerText = active ? "🔊 Musik: ON" : "🔇 Musik: OFF";
+}
+
+function detachRoomListener() {
+  if (GAME.roomRef) {
+    GAME.roomRef.off();
+    GAME.roomRef = null;
+  }
+  GAME.roomData = null;
+  GAME.roomCode = null;
+  GAME.isHost = false;
+  GAME.mode = "solo";
+}
+
+/* ==========================================================================
+   MENU UTAMA & LOBI MULTIPLAYER PARALEL
+   ========================================================================== */
+function init() {
+  renderTitle();
+}
+
+function renderTitle() {
+  detachRoomListener();
+  document.documentElement.style.setProperty('--ep-color', 'var(--accent-blue)');
+
+  const savedName = localStorage.getItem("moral_player_name") || "";
+
+  $('#app').innerHTML = `
+    <div class="card">
+      ${renderArt('title_cover', 'Cover Utama Game')}
+      <h1>Dilema Moral: Tentukan Hidupmu</h1>
+      <p style="color:var(--text-muted)">Game Naratif Interaktif Etika Terapan — Mode Solo &amp; Multiplayer Paralel</p>
+      <hr style="border-color:var(--border-color);margin:16px 0">
+
+      ${!db ? `
+        <div class="warn-banner">
+          <b>⚠️ Info Multiplayer Online:</b> Konfigurasi <code>FIREBASE_CONFIG</code> di dalam kode masih kosong. Isi <code>apiKey</code> &amp; <code>databaseURL</code> Firebase untuk mengaktifkan room online antar perangkat. Mode Solo tetap bisa dimainkan sekarang!
         </div>
-        <div class="face back">
-          <div class="pinyin text-xl font-extrabold">${w.p}</div>
-          <div class="font-bold text-lg">${w.e}</div>
-          <div class="mt-2 text-xs leading-snug opacity-95">
-            <div class="hanzi text-sm font-bold">${w.s}</div>
-            <div class="pinyin">${w.sp}</div>
-            <div>${w.se}</div>
+      ` : ''}
+
+      <div class="lobby-panel" style="margin-bottom:20px">
+        <h3 style="color:var(--accent-blue);margin-bottom:6px">🌐 Multiplayer Mode Paralel (Adu Prinsip &amp; Ending)</h3>
+        <p style="font-size:0.88rem;color:var(--text-muted)">Semua pemain masuk ke room yang sama, menyelesaikan 5 kasus secara mandiri, lalu membandingkan skor moral &amp; <i>Ending</i> di papan klasemen akhir.</p>
+
+        <div style="margin-bottom:14px">
+          <label style="font-size:0.82rem;color:var(--text-muted)">Nama Pemain Anda:</label>
+          <input id="playerNameInput" class="input-field" type="text" maxlength="18" placeholder="Contoh: Marcella / Laila" value="${esc(savedName)}">
+        </div>
+
+        <div class="grid-2">
+          <div class="lobby-panel" style="background:rgba(0,0,0,0.25)">
+            <b style="color:#fff;font-size:0.95rem">1. Buat Room Baru (Host)</b>
+            <div class="btn-group" style="margin-top:10px">
+              <button class="primary" onclick="createParallelRoom(1)" ${!db ? 'disabled' : ''}>
+                Buat Room Episode 1<br><small style="color:var(--text-muted)">Utilitarisme (Laila)</small>
+              </button>
+              <button class="primary" style="border-color:var(--accent-purple);color:var(--accent-purple)" onclick="createParallelRoom(2)" ${!db ? 'disabled' : ''}>
+                Buat Room Episode 2<br><small style="color:var(--text-muted)">Deontologi (Marcella)</small>
+              </button>
+            </div>
+          </div>
+
+          <div class="lobby-panel" style="background:rgba(0,0,0,0.25)">
+            <b style="color:#fff;font-size:0.95rem">2. Gabung Room Teman</b>
+            <label style="font-size:0.8rem;color:var(--text-muted);display:block;margin-top:8px">Masukkan Kode Room:</label>
+            <input id="joinCodeInput" class="input-field" type="text" maxlength="6" placeholder="MISAL: A7X9K" style="text-transform:uppercase;letter-spacing:2px">
+            <button class="primary" style="width:100%;margin-top:10px;text-align:center" onclick="joinParallelRoom()" ${!db ? 'disabled' : ''}>
+              Gabung ke Room →
+            </button>
           </div>
         </div>
-      </div>`;
-    const btn = document.createElement("button");
-    btn.className = "spk"; btn.type = "button";
-    btn.setAttribute("aria-label","Pronounce " + w.h);
-    btn.textContent = "🔊";
-    btn.addEventListener("click", e => { e.stopPropagation(); speak(w0.h); });
-    scene.appendChild(btn);
-    const flip = () => scene.classList.toggle("flipped");
-    scene.addEventListener("click", flip);
-    scene.addEventListener("keydown", e => { if(e.target === scene && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); flip(); } });
-    deck.appendChild(scene);
-  });
+      </div>
+
+      <h3>👤 Main Sendiri (Mode Solo)</h3>
+      <div class="btn-group">
+        <button class="choice-btn" onclick="audio.playSFX('click'); startSoloEpisode(1)">
+          <b>Episode 1: Utilitarisme — Demi Kebaikan Bersama</b><br>
+          <small style="color:var(--text-muted)">Tokoh Utama: Laila (Pengelola Koperasi) | Kalkulus Kebahagiaan</small>
+        </button>
+
+        <button class="choice-btn" onclick="audio.playSFX('click'); startSoloEpisode(2)">
+          <b>Episode 2: Deontologi — Juru Lupa Kota Sumbra</b><br>
+          <small style="color:var(--text-muted)">Tokoh Utama: Marcella (Balai Pelupaan) | Hukum &amp; Kebenaran Mutlak</small>
+        </button>
+      </div>
+    </div>
+  `;
 }
-buildDeck();
 
-// Quiz & Timer (Fisher-Yates True Random Shuffle)
-const quizEl = document.getElementById("quiz");
-const scoreEl = document.getElementById("score");
-const timerEl = document.getElementById("timer");
-let questions = [], qi = 0, score = 0;
-let timerInterval = null, secondsElapsed = 0;
-
-function shuffle(arr){
-  const a = [...arr];
-  for(let i = a.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+function getValidatedName() {
+  const input = $('#playerNameInput');
+  const raw = input ? input.value.trim() : "";
+  if (!raw) {
+    alert("Masukkan nama pemain terlebih dahulu!");
+    if (input) input.focus();
+    return null;
   }
-  return a;
+  localStorage.setItem("moral_player_name", raw);
+  GAME.playerName = raw;
+  return raw;
 }
 
-function formatTime(sec){
-  const m = String(Math.floor(sec / 60)).padStart(2, "0");
-  const s = String(sec % 60).padStart(2, "0");
-  return `${m}:${s}`;
+function generateRoomCode() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 5; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
 }
 
-function startTimer(){
-  clearInterval(timerInterval);
-  secondsElapsed = 0;
-  timerEl.textContent = "00:00";
-  timerInterval = setInterval(() => {
-    secondsElapsed++;
-    timerEl.textContent = formatTime(secondsElapsed);
-  }, 1000);
+async function createParallelRoom(epNum) {
+  if (!db) return;
+  const name = getValidatedName();
+  if (!name) return;
+
+  audio.playSFX('click');
+  const code = generateRoomCode();
+  const roomRef = db.ref(`rooms/${code}`);
+
+  const initialPlayer = {
+    name: name,
+    isHost: true,
+    step: 0,
+    finished: false,
+    score1: epNum === 1 ? 0 : 50,
+    score2: epNum === 1 ? 50 : 100,
+    score3: epNum === 1 ? 50 : 0,
+    endingTitle: "",
+    durationMs: 0,
+    joinedAt: Date.now()
+  };
+
+  await roomRef.set({
+    code: code,
+    episode: epNum,
+    status: "lobby",
+    hostId: GAME.playerId,
+    createdAt: Date.now(),
+    players: {
+      [GAME.playerId]: initialPlayer
+    }
+  });
+
+  GAME.mode = "multiplayer";
+  GAME.roomCode = code;
+  GAME.isHost = true;
+  GAME.currentEp = epNum;
+  listenToRoom(code);
 }
 
-function stopTimer(){
-  clearInterval(timerInterval);
-}
+async function joinParallelRoom() {
+  if (!db) return;
+  const name = getValidatedName();
+  if (!name) return;
 
-function startQuiz(){
-  if(WORDS.length < 4){
-    stopTimer();
-    quizEl.innerHTML = '<div class="muted p-3">Add at least 4 words to unlock the quiz.</div>';
-    scoreEl.textContent = "0";
+  const codeInput = $('#joinCodeInput');
+  const code = codeInput ? codeInput.value.trim().toUpperCase() : "";
+  if (!code) {
+    alert("Masukkan kode room terlebih dahulu!");
+    if (codeInput) codeInput.focus();
     return;
   }
-  questions = shuffle(WORDS).slice(0,4).map(w => ({
-    word: w,
-    options: shuffle([w, ...shuffle(WORDS.filter(x => x !== w)).slice(0,3)])
-  }));
-  qi = 0; score = 0; scoreEl.textContent = "0";
-  startTimer();
-  renderQ();
-}
 
-function renderQ(){
-  const q = questions[qi];
-  const labels = ["A", "B", "C", "D"];
-  quizEl.innerHTML = `
-    <div class="text-xs font-extrabold muted">Question ${qi+1} of 4</div>
-    <div class="text-center my-4">
-      <div class="hanzi font-extrabold teal" style="font-size:4rem;line-height:1.1">${esc(q.word.h)}</div>
-      <div class="pinyin muted mt-1">${esc(q.word.p)}</div>
-      <button type="button" id="qSpk" class="btn mt-3" style="padding:.4rem 1rem">🔊 Listen</button>
-    </div>
-    <div class="grid gap-3" id="opts"></div>
-    <div id="fb" class="mt-4 font-bold min-h-[1.5rem]" aria-live="polite"></div>
-    <div id="nx" class="mt-3 text-right"></div>`;
-  document.getElementById("qSpk").addEventListener("click", () => speak(q.word.h));
-  const opts = document.getElementById("opts");
-  q.options.forEach((o, idx) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "opt";
-    b.dataset.answer = o.e;
-    b.innerHTML = `<span class="opt-badge">${labels[idx]}</span><span>${esc(o.e)}</span>`;
-    b.addEventListener("click", () => answer(b, o, q));
-    opts.appendChild(b);
-  });
-}
+  audio.playSFX('click');
+  const roomRef = db.ref(`rooms/${code}`);
+  const snap = await roomRef.once("value");
 
-function answer(btn, chosen, q){
-  const all = [...document.querySelectorAll("#opts .opt")];
-  all.forEach(b => b.disabled = true);
-  const fb = document.getElementById("fb");
-  if(chosen === q.word){
-    btn.classList.add("ok"); score++; scoreEl.textContent = score;
-    fb.style.color = "var(--ok)"; fb.textContent = "✅ Correct! 太棒了!";
-  } else {
-    btn.classList.add("bad");
-    all.find(b => b.dataset.answer === q.word.e).classList.add("ok");
-    fb.style.color = "var(--bad)"; fb.textContent = "❌ Not quite. " + q.word.h + " means “" + q.word.e + "”.";
+  if (!snap.exists()) {
+    alert(`Room "${code}" tidak ditemukan. Periksa kembali kodenya.`);
+    return;
   }
-  const nx = document.getElementById("nx");
-  const last = qi === questions.length - 1;
-  if(last) stopTimer();
-  nx.innerHTML = `<button type="button" class="btn" id="nbtn">${last ? "See results" : "Next question →"}</button>`;
-  document.getElementById("nbtn").addEventListener("click", () => { last ? renderEnd() : (qi++, renderQ()); });
+
+  const data = snap.val();
+  if (data.status === "playing") {
+    alert("Permainan di room ini sudah dimulai!");
+    return;
+  }
+
+  const epNum = data.episode || 1;
+  GAME.mode = "multiplayer";
+  GAME.roomCode = code;
+  GAME.isHost = (data.hostId === GAME.playerId);
+  GAME.currentEp = epNum;
+
+  await roomRef.child(`players/${GAME.playerId}`).set({
+    name: name,
+    isHost: GAME.isHost,
+    step: 0,
+    finished: false,
+    score1: epNum === 1 ? 0 : 50,
+    score2: epNum === 1 ? 50 : 100,
+    score3: epNum === 1 ? 50 : 0,
+    endingTitle: "",
+    durationMs: 0,
+    joinedAt: Date.now()
+  });
+
+  listenToRoom(code);
 }
 
-function renderEnd(){
-  stopTimer();
-  const msg = score === 4 ? "Perfect! 完美!" : score >= 2 ? "Nice work! 不错!" : "Good try, review the cards and go again!";
-  quizEl.innerHTML = `
-    <div class="text-center py-4">
-      <div style="font-size:3rem">${score === 4 ? "🏆" : "🌟"}</div>
-      <div class="text-2xl font-extrabold mt-2">You scored ${score} / 4</div>
-      <div class="inline-block mt-2 px-3 py-1 rounded-full bg-tealsoft teal font-extrabold text-xs">⏱️ Time taken: ${formatTime(secondsElapsed)}</div>
-      <p class="muted mt-2">${msg}</p>
-      <button type="button" class="btn mt-4" id="again">Try again 🔁</button>
-    </div>`;
-  document.getElementById("again").addEventListener("click", startQuiz);
-}
+function listenToRoom(code) {
+  if (GAME.roomRef) GAME.roomRef.off();
+  GAME.roomRef = db.ref(`rooms/${code}`);
 
-startQuiz();
+  // Hapus pemain dari lobby jika menutup tab saat masih di lobby
+  GAME.roomRef.child(`players/${GAME.playerId}`).onDisconnect().remove();
 
-// ===== Sub-pages =====
-const $ = id => document.getElementById(id);
-const PAGES = ["home","materials","homework","videos"];
-function show(p){
-  if(!PAGES.includes(p)) p = "home";
-  PAGES.forEach(n => $("page-"+n).classList.toggle("hidden", n !== p));
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.p === p));
-}
-document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
-  show(t.dataset.p);
-  try{ location.hash = t.dataset.p; }catch(e){}
-}));
-window.addEventListener("hashchange", () => show(location.hash.slice(1)));
-show(location.hash.slice(1));
+  let hasStartedLocalGame = false;
 
-function mk(tag, cls, text){ const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; }
-function safe(u){ return /^https?:\/\//i.test(u || "") ? u : ""; }
-function lnk(href, label, extra){ const a = mk("a", "lnk " + (extra || ""), label); a.href = safe(href) || "#"; a.target = "_blank"; a.rel = "noopener"; return a; }
-function empty(box, msg){ box.appendChild(mk("div", "muted text-sm p-3", msg)); }
+  GAME.roomRef.on("value", (snap) => {
+    if (!snap.exists()) {
+      alert("Room telah ditutup oleh Host.");
+      renderTitle();
+      return;
+    }
 
-function renderMaterials(items){
-  const box = $("matList"); box.textContent = "";
-  if(!items.length) return empty(box, "No materials yet. Check back soon!");
-  items.forEach(m => {
-    const row = mk("div", "item");
-    row.appendChild(mk("div", "font-extrabold", "📄 " + m.title));
-    row.appendChild(lnk(m.url, "Open PDF")); box.appendChild(row);
+    GAME.roomData = snap.val();
+    GAME.currentEp = GAME.roomData.episode || 1;
+
+    if (GAME.roomData.status === "lobby") {
+      renderLobby();
+    } else if (GAME.roomData.status === "playing") {
+      // Batalkan auto-remove saat sudah masuk game agar data skor akhir tetap tersimpan
+      GAME.roomRef.child(`players/${GAME.playerId}`).onDisconnect().cancel();
+
+      if (!hasStartedLocalGame) {
+        hasStartedLocalGame = true;
+        beginPlaySession(GAME.currentEp);
+      } else {
+        // Perbarui live tracker atau klasemen akhir secara real-time
+        updateLiveElements();
+      }
+    }
   });
 }
-function renderVideos(items){
-  [["recList","recording","No recordings yet."],["refList","reference","No recommendations yet."]].forEach(([id, kind, msg]) => {
-    const box = $(id); box.textContent = "";
-    const list = items.filter(v => v.kind === kind);
-    if(!list.length) return empty(box, msg);
-    list.forEach(v => {
-      const row = mk("div", "item"), left = mk("div");
-      left.appendChild(mk("div", "font-extrabold", "▶ " + v.title));
-      if(v.note) left.appendChild(mk("div", "muted text-sm", v.note));
-      row.appendChild(left); row.appendChild(lnk(v.url, "Watch", kind === "reference" ? "o" : "")); box.appendChild(row);
-    });
+
+function copyRoomCode() {
+  if (!GAME.roomCode) return;
+  navigator.clipboard?.writeText(GAME.roomCode);
+  const btn = $('#copyBtn');
+  if (btn) {
+    btn.innerText = "✓ Tersalin";
+    setTimeout(() => { if (btn) btn.innerText = "Salin Kode"; }, 1800);
+  }
+}
+
+function renderLobby() {
+  const data = GAME.roomData;
+  const ep = EPISODES[data.episode];
+  document.documentElement.style.setProperty('--ep-color', ep.color);
+
+  const playersObj = data.players || {};
+  const playerList = Object.entries(playersObj);
+
+  $('#app').innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <span style="font-size:0.8rem;color:var(--ep-color);font-weight:700;text-transform:uppercase">Lobi Multiplayer Paralel</span>
+        <button onclick="audio.playSFX('click'); leaveLobby()" style="padding:6px 12px;font-size:0.8rem">Keluar Room</button>
+      </div>
+
+      <h2 style="margin-top:8px">${ep.title}</h2>
+      <p style="font-size:0.9rem;color:var(--text-muted)">Bagikan kode room ini kepada teman-temanmu untuk bergabung:</p>
+
+      <div class="room-code-box">
+        <div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">KODE ROOM</div>
+          <div class="room-code-text">${esc(data.code)}</div>
+        </div>
+        <button id="copyBtn" class="primary" onclick="copyRoomCode()" style="padding:8px 14px;font-size:0.85rem">Salin Kode</button>
+      </div>
+
+      <h3 style="font-size:1.05rem">Daftar Pemain di Ruangan (${playerList.length}):</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px">
+        ${playerList.map(([id, p]) => `
+          <span class="player-pill ${id === GAME.playerId ? 'me' : ''}">
+            ${p.isHost ? '👑' : '👤'} ${esc(p.name)} ${id === GAME.playerId ? '(Anda)' : ''}
+          </span>
+        `).join('')}
+      </div>
+
+      ${GAME.isHost ? `
+        <button class="primary" style="width:100%;text-align:center;font-size:1rem;padding:14px" onclick="audio.playSFX('click'); hostStartParallelGame()">
+          Mulai Game Paralel Sekarang (${playerList.length} Pemain) →
+        </button>
+      ` : `
+        <div class="lobby-panel" style="text-align:center;color:var(--accent-amber)">
+          ⏳ Menunggu Host memulai permainan...
+        </div>
+      `}
+    </div>
+  `;
+}
+
+async function leaveLobby() {
+  if (GAME.roomRef && GAME.playerId) {
+    await GAME.roomRef.child(`players/${GAME.playerId}`).remove();
+  }
+  renderTitle();
+}
+
+async function hostStartParallelGame() {
+  if (!GAME.roomRef || !GAME.isHost) return;
+  await GAME.roomRef.update({
+    status: "playing",
+    startedAt: Date.now()
   });
 }
-function renderHomework(items){
-  const body = $("hwBody"); body.textContent = "";
-  if(!items.length){ const tr = mk("tr"), td = mk("td", "muted", "No homework yet. Enjoy your break! 🎉"); td.colSpan = 4; tr.appendChild(td); body.appendChild(tr); return; }
-  items.forEach(h => {
-    const tr = mk("tr"), t = mk("td"), u = mk("td"), s = mk("td"), f = mk("td");
-    t.appendChild(mk("div", "font-extrabold", h.title));
-    if(h.due) t.appendChild(mk("div", "muted text-xs", "Due: " + h.due));
-    if(safe(h.url)) u.appendChild(lnk(h.url, "⬆️ Upload", "o")); else u.appendChild(mk("span", "muted text-xs", "No link yet"));
-    s.appendChild(mk("span", "font-extrabold teal", h.score || "—"));
-    f.appendChild(mk("span", h.feedback ? "" : "muted text-xs", h.feedback || "Waiting for feedback"));
-    [t, u, s, f].forEach(c => tr.appendChild(c)); body.appendChild(tr);
+
+/* ==========================================================================
+   LOGIKA GAMEPLAY (SOLO & PARALEL)
+   ========================================================================== */
+function startSoloEpisode(epNum) {
+  detachRoomListener();
+  GAME.mode = "solo";
+  beginPlaySession(epNum);
+}
+
+function beginPlaySession(epNum) {
+  GAME.currentEp = epNum;
+  const ep = EPISODES[epNum];
+  document.documentElement.style.setProperty('--ep-color', ep.color);
+
+  GAME.startTime = Date.now();
+  GAME.state = {
+    index: 0,
+    score1: epNum === 1 ? 0 : 50,
+    score2: epNum === 1 ? 50 : 100,
+    score3: epNum === 1 ? 50 : 0,
+    history: [],
+    inspectionsDone: [],
+    dialogueHistory: []
+  };
+
+  syncMyProgressToFirebase(false, "");
+
+  $('#app').innerHTML = `
+    <div class="card">
+      ${renderArt(ep.banner, ep.title)}
+      <h2>${ep.title}</h2>
+      <p><b>Prinsip Utama:</b> <i>"${ep.principle}"</i></p>
+      <p>Anda berperan sebagai <b>${ep.hero}</b> (${ep.role}).</p>
+      ${GAME.mode === "multiplayer" ? `<p style="color:var(--accent-green);font-size:0.9rem">🌐 <b>Mode Paralel Aktif:</b> Selesaikan 5 kasus seefektif mungkin. Hasil akhir Anda akan dibandingkan dengan pemain lain di Room <b>${esc(GAME.roomCode)}</b>.</p>` : ''}
+      <button class="primary" onclick="audio.playSFX('click'); audio.startBGM(${epNum}); renderScenario()" style="margin-top:10px">
+        Mulai Kasus Pertama →
+      </button>
+    </div>
+  `;
+}
+
+function syncMyProgressToFirebase(isFinished, endingTitle) {
+  if (GAME.mode !== "multiplayer" || !GAME.roomRef) return;
+  const s = GAME.state;
+  const payload = {
+    step: s.index,
+    finished: isFinished,
+    score1: s.score1,
+    score2: s.score2,
+    score3: s.score3,
+    endingTitle: endingTitle || "",
+    durationMs: isFinished ? (Date.now() - GAME.startTime) : 0
+  };
+  GAME.roomRef.child(`players/${GAME.playerId}`).update(payload);
+}
+
+function renderLiveRoomBar() {
+  if (GAME.mode !== "multiplayer" || !GAME.roomData || !GAME.roomData.players) return "";
+  const players = Object.entries(GAME.roomData.players);
+  return `
+    <div class="live-tracker" id="liveRoomBar">
+      <b style="color:var(--ep-color)">🌐 Room ${esc(GAME.roomCode)}:</b>
+      ${players.map(([id, p]) => {
+        const statusText = p.finished ? "✓ Selesai" : `Kasus ${Math.min((p.step || 0) + 1, 5)}/5`;
+        return `<span class="player-pill ${p.finished ? 'done' : ''} ${id === GAME.playerId ? 'me' : ''}">${esc(p.name)}: ${statusText}</span>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function updateLiveElements() {
+  const bar = $('#liveRoomBar');
+  if (bar) {
+    const temp = document.createElement('div');
+    temp.innerHTML = renderLiveRoomBar();
+    if (temp.firstElementChild) {
+      bar.replaceWith(temp.firstElementChild);
+    }
+  }
+  const board = $('#parallelLeaderboardContainer');
+  if (board) {
+    board.innerHTML = renderParallelLeaderboardHTML();
+  }
+}
+
+function renderHUD() {
+  const s = GAME.state;
+  const epNum = GAME.currentEp;
+
+  const hudHtml = epNum === 1 ? `
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Kasus</span>
+        <span class="hud-val">${s.index + 1} / 5</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Net Utilitas (U)</span>
+        <span class="hud-val ${s.score1 < 0 ? 'neg' : ''}">${s.score1 > 0 ? '+' : ''}${s.score1} U</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Warga</span>
+        <span class="hud-val">${s.score2}%</span>
+      </div>
+      <button id="audioBtn" class="sound-btn" onclick="toggleAudio()">
+        ${audio.isPlaying ? "🔊 Musik: ON" : "🔇 Musik: OFF"}
+      </button>
+    </div>
+  ` : `
+    <div class="hud">
+      <div class="hud-item">
+        <span class="hud-label">Tahap</span>
+        <span class="hud-val">${s.index + 1} / 5</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Kewajiban (D)</span>
+        <span class="hud-val">${s.score1}%</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Kebenaran</span>
+        <span class="hud-val ${s.score2 < 50 ? 'neg' : ''}">${s.score2}%</span>
+      </div>
+      <div class="hud-item">
+        <span class="hud-label">Keraguan</span>
+        <span class="hud-val ${s.score3 > 0 ? 'neg' : ''}">${s.score3}x</span>
+      </div>
+      <button id="audioBtn" class="sound-btn" onclick="toggleAudio()">
+        ${audio.isPlaying ? "🔊 Musik: ON" : "🔇 Musik: OFF"}
+      </button>
+    </div>
+  `;
+
+  return hudHtml + renderLiveRoomBar();
+}
+
+function renderScenario() {
+  const ep = EPISODES[GAME.currentEp];
+  const sc = ep.scenarios[GAME.state.index];
+  const s = GAME.state;
+
+  $('#app').innerHTML = `
+    ${renderHUD()}
+    <div class="card">
+      ${renderArt(sc.assetKey, sc.title)}
+      <h3>${sc.title}</h3>
+      <p style="margin-bottom:16px">${sc.context}</p>
+
+      <h4 style="font-size:0.9rem;color:var(--ep-color);margin-bottom:8px">Penyelidikan &amp; Fakta Lapangan:</h4>
+      <div class="log-box" id="logBox">
+        <div class="log-entry"><b>Sistem:</b> Pelajari fakta-fakta sebelum mengambil keputusan etika.</div>
+        ${s.dialogueHistory.map(d => `<div class="log-entry"><b>${d.label}:</b> ${d.text}</div>`).join('')}
+      </div>
+
+      <div class="btn-group" style="flex-direction:row;flex-wrap:wrap">
+        <button class="action-btn" onclick="investigate(1)" ${s.inspectionsDone.includes(1) ? 'disabled' : ''}>Pemeriksaan 1</button>
+        <button class="action-btn" onclick="investigate(2)" ${s.inspectionsDone.includes(2) ? 'disabled' : ''}>Pemeriksaan 2</button>
+        <button class="action-btn" onclick="investigate(3)" ${s.inspectionsDone.includes(3) ? 'disabled' : ''}>Analisis Fakta</button>
+      </div>
+
+      <h4 style="font-size:0.9rem;color:var(--accent-amber);margin:20px 0 8px">Tindakan ${ep.hero}:</h4>
+      <div class="btn-group">
+        <button class="choice-btn" onclick="makeChoice('deontology', 'utilitarian')">
+          ${sc.choices.utilitarian ? sc.choices.utilitarian.label : sc.choices.deontology.label}
+        </button>
+        <button class="choice-btn" onclick="makeChoice('empathy', 'personal')">
+          ${sc.choices.personal ? sc.choices.personal.label : sc.choices.empathy.label}
+        </button>
+        <button class="choice-btn" onclick="makeChoice('hesitate', 'compromise')">
+          ${sc.choices.compromise ? sc.choices.compromise.label : sc.choices.hesitate.label}
+        </button>
+      </div>
+    </div>
+  `;
+
+  const log = $('#logBox');
+  if (log) log.scrollTop = log.scrollHeight;
+}
+
+function investigate(num) {
+  audio.playSFX('scan');
+  const sc = EPISODES[GAME.currentEp].scenarios[GAME.state.index];
+  GAME.state.inspectionsDone.push(num);
+
+  const text = sc.details[`investigate_${num}`];
+  GAME.state.dialogueHistory.push({ label: `Fakta ${num}`, text });
+  renderScenario();
+}
+
+function makeChoice(keyEp2, keyEp1) {
+  const epNum = GAME.currentEp;
+  const key = epNum === 1 ? keyEp1 : keyEp2;
+  const sc = EPISODES[epNum].scenarios[GAME.state.index];
+  const choice = sc.choices[key];
+
+  if (choice.hesitate) {
+    audio.playSFX('warn');
+    GAME.state.score3++;
+  } else {
+    audio.playSFX('click');
+  }
+
+  if (epNum === 1) {
+    GAME.state.score1 += choice.primaryDelta;
+    GAME.state.score2 = Math.max(0, Math.min(100, GAME.state.score2 + choice.secDelta));
+    GAME.state.score3 = Math.max(0, Math.min(100, GAME.state.score3 + choice.hubDelta));
+  } else {
+    GAME.state.score1 = Math.max(0, Math.min(100, GAME.state.score1 + choice.primaryDelta));
+    GAME.state.score2 = Math.max(0, Math.min(100, GAME.state.score2 + choice.secDelta));
+  }
+
+  GAME.state.history.push({
+    title: sc.title,
+    chosenLabel: choice.label,
+    outcomeText: choice.text,
+    desc: choice.desc
   });
+
+  syncMyProgressToFirebase(false, "");
+
+  $('#app').innerHTML = `
+    ${renderHUD()}
+    <div class="card">
+      <h3>Hasil Keputusan ${EPISODES[epNum].hero}</h3>
+      <p style="font-size:1.05rem;color:var(--accent-amber);margin:14px 0">"${choice.text}"</p>
+
+      <table class="ledger-table">
+        <tr><th>Parameter Etika</th><th>Dampak</th></tr>
+        <tr><td>${epNum === 1 ? 'Dampak Net Utilitas (U)' : 'Skor Kewajiban (D)'}</td><td>${choice.primaryDelta > 0 ? '+' : ''}${choice.primaryDelta}</td></tr>
+        <tr><td>${epNum === 1 ? 'Kesejahteraan Warga' : 'Kebenaran Mutlak'}</td><td>${choice.secDelta > 0 ? '+' : ''}${choice.secDelta}%</td></tr>
+      </table>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px"><i>Catatan Prinsip: ${choice.desc}</i></p>
+
+      <button class="primary" onclick="audio.playSFX('click'); nextScenario()" style="margin-top:16px;width:100%">
+        ${GAME.state.index + 1 < 5 ? "Lanjut ke Kasus Berikutnya" : "Lihat Keputusan Akhir"}
+      </button>
+    </div>
+  `;
 }
-function renderGrammar(items){
-  const ul = $("gramList"); ul.textContent = "";
-  items.forEach(g => {
-    const li = mk("li"); li.appendChild(mk("b", "", g.title || ""));
-    if(g.zh || g.py){ li.appendChild(mk("br")); if(g.zh) li.appendChild(mk("span", "hanzi text-lg", g.zh)); if(g.py) li.appendChild(mk("span", "pinyin muted", " " + g.py)); }
-    if(g.en){ li.appendChild(mk("br")); li.appendChild(mk("span", "muted", g.en)); }
-    ul.appendChild(li);
+
+function nextScenario() {
+  GAME.state.index++;
+  GAME.state.inspectionsDone = [];
+  GAME.state.dialogueHistory = [];
+
+  if (GAME.state.index < 5) {
+    syncMyProgressToFirebase(false, "");
+    renderScenario();
+  } else {
+    renderSummary();
+  }
+}
+
+function renderParallelLeaderboardHTML() {
+  if (GAME.mode !== "multiplayer" || !GAME.roomData || !GAME.roomData.players) return "";
+  const epNum = GAME.currentEp;
+  const players = Object.entries(GAME.roomData.players).map(([id, p]) => ({ id, ...p }));
+
+  // Urutkan: yang sudah selesai di atas, lalu berdasarkan skor utama tertinggi, lalu waktu tercepat
+  players.sort((a, b) => {
+    if (a.finished !== b.finished) return a.finished ? -1 : 1;
+    if (!a.finished && !b.finished) return (b.step || 0) - (a.step || 0);
+    if (b.score1 !== a.score1) return b.score1 - a.score1;
+    if (b.score2 !== a.score2) return b.score2 - a.score2;
+    return (a.durationMs || 9999999) - (b.durationMs || 9999999);
   });
+
+  const finishedCount = players.filter(p => p.finished).length;
+
+  return `
+    <div style="margin:24px 0;padding:18px;background:rgba(0,0,0,0.35);border:1px solid var(--ep-color);border-radius:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+        <h3 style="margin:0;color:var(--ep-color)">🏆 Komparasi Paralel Room ${esc(GAME.roomCode)}</h3>
+        <span style="font-size:0.8rem;color:var(--accent-green)">Selesai: ${finishedCount} / ${players.length} Pemain</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="ledger-table">
+          <tr>
+            <th>#</th>
+            <th>Pemain</th>
+            <th>Status / Waktu</th>
+            <th>${epNum === 1 ? 'Utilitas &amp; Warga' : 'Kewajiban &amp; Kebenaran'}</th>
+            <th>Predikat Ending</th>
+          </tr>
+          ${players.map((p, idx) => `
+            <tr class="${p.id === GAME.playerId ? 'me-row' : ''}">
+              <td><b>${idx + 1}</b></td>
+              <td><b>${esc(p.name)}</b> ${p.id === GAME.playerId ? '<small>(Anda)</small>' : ''}</td>
+              <td>${p.finished ? `✅ ${formatDuration(p.durationMs)}` : `⏳ Kasus ${Math.min((p.step || 0) + 1, 5)}/5`}</td>
+              <td>${epNum === 1 ? `${p.score1} U · Warga ${p.score2}%` : `D: ${p.score1}% · Kebenaran ${p.score2}%`}</td>
+              <td>${p.finished ? esc(p.endingTitle) : '<i style="color:var(--text-muted)">Sedang menimbang...</i>'}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+    </div>
+  `;
 }
-function renderTips(items){
-  const ul = $("tipList"); ul.textContent = "";
-  items.forEach(t => ul.appendChild(mk("li", "", t)));
+
+function renderSummary() {
+  const s = GAME.state;
+  const epNum = GAME.currentEp;
+  let assetEnding = "";
+  let titleEnding = "";
+  let evalText = "";
+
+  if (epNum === 1) {
+    if (s.score1 >= 120) {
+      assetEnding = "ending_ep1_high";
+      titleEnding = "Utilitaris Sejati — Kebaikan Kolektif Maksimal";
+      evalText = "Laila berhasil mengambil keputusan rasional demi kesejahteraan sebagian besar warga. Pemukiman warga secara keseluruhan tumbuh dan selamat dari krisis.";
+    } else if (s.score1 >= 40) {
+      assetEnding = "ending_ep1_mid";
+      titleEnding = "Pemimpin Kompromis — Keseimbangan Rentan";
+      evalText = "Laila berusaha menyeimbangkan antara aturan utilitas dan perasaan pribadi. Hasilnya cukup stabil bagi warga.";
+    } else {
+      assetEnding = "ending_ep1_low";
+      titleEnding = "Pilihan Emosional — Kegagalan Utilitas";
+      evalText = "Keputusan Laila lebih banyak didorong oleh rasa kasihan dan ikatan pribadi. Sebagian besar warga mengalami dampak krisis.";
+    }
+  } else {
+    if (s.score3 >= 3) {
+      assetEnding = "ending_ep2_corrupt";
+      titleEnding = "ENDING 3: INGATAN KERAPUHAN (Dampak Keraguan)";
+      evalText = "Akibat keraguan Marcella yang berlarut-larut, sinyal gelombang memori mengalami overload. Ingatan Rani terdistorsi dan terfragmentasi. Rani lupa nama saudarinya, namun penderitaan emosionalnya tetap menghantuinya.";
+    } else if (s.score1 >= 60) {
+      assetEnding = "ending_ep2_deon";
+      titleEnding = "ENDING 1: PENJAGA KEBENARAN MUTLAK (Deontologi Sejati)";
+      evalText = "Marcella menaati Sumpah Juru Lupa dan Hukum Kota Sumbra secara mutlak. Permohonan Rani ditolak. Kebenaran tewasnya Rina tetap utuh di dalam sejarah kota.";
+    } else {
+      assetEnding = "ending_ep2_mercy";
+      titleEnding = "ENDING 2: BELAS KASIH YANG MENGAPUS SEJARAH (Pelanggaran Tugas)";
+      evalText = "Marcella melanggar sumpah profesinya demi belas kasih. Rani tenang tanpa beban ingatan jembatan, namun kebenaran tewasnya Rina terhapus selamanya dari dunia.";
+    }
+  }
+
+  syncMyProgressToFirebase(true, titleEnding);
+
+  $('#app').innerHTML = `
+    <div class="card">
+      ${renderArt(assetEnding, titleEnding)}
+      <h2>Akhir Episode ${epNum}: Audit Keputusan</h2>
+      <h3 style="color:var(--ep-color)">${titleEnding}</h3>
+      <p style="margin:12px 0">${evalText}</p>
+
+      <div style="background:rgba(0,0,0,0.4);padding:14px;border-radius:8px;margin:16px 0">
+        ${epNum === 1 ? `
+          <p><b>Total Skor Utilitas (U):</b> ${s.score1} U</p>
+          <p><b>Kesejahteraan Warga:</b> ${s.score2}%</p>
+          <p><b>Hubungan Personal Laila:</b> ${s.score3}%</p>
+        ` : `
+          <p><b>Skor Kewajiban (D):</b> ${s.score1}%</p>
+          <p><b>Kebenaran Mutlak:</b> ${s.score2}%</p>
+          <p><b>Tingkat Keraguan Marcella:</b> ${s.score3} kali</p>
+        `}
+      </div>
+
+      <div id="parallelLeaderboardContainer">
+        ${renderParallelLeaderboardHTML()}
+      </div>
+
+      <h4>Rekapitulasi Tindakan ${EPISODES[epNum].hero}:</h4>
+      <table class="ledger-table">
+        <tr><th>Tahap</th><th>Pilihan</th></tr>
+        ${s.history.map(h => `
+          <tr>
+            <td>${h.title}</td>
+            <td>${h.chosenLabel}</td>
+          </tr>
+        `).join('')}
+      </table>
+
+      <div class="btn-group" style="margin-top:20px">
+        ${GAME.mode === "solo" ? `<button class="primary" onclick="audio.playSFX('click'); startSoloEpisode(${epNum})">Ulangi Episode ${epNum}</button>` : ''}
+        <button onclick="audio.playSFX('click'); renderTitle()">Kembali ke Menu Utama</button>
+      </div>
+    </div>
+  `;
 }
-function init(d){
-  const h = d.header || {};
-  if(h.level) $("level").textContent = h.level;
-  if(h.goal) $("goal").textContent = h.goal;
-  if(h.nextLesson) $("next").textContent = h.nextLesson;
-  if(Array.isArray(d.words) && d.words.length){ WORDS = d.words; buildDeck(); startQuiz(); }
-  renderGrammar(d.grammar || []); renderTips(d.tips || []);
-  renderMaterials(d.materials || []); renderVideos(d.videos || []); renderHomework(d.homework || []);
-}
-fetch("data.json", {cache: "no-store"})
-  .then(r => { if(!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-  .then(init)
-  .catch(() => ["matList","recList","refList"].forEach(i => empty($(i), "Content could not be loaded.")));
+
+window.onload = init;
 </script>
 </body>
 </html>
